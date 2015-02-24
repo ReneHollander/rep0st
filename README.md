@@ -1,4 +1,4 @@
-# rep0st - Lasset den Benis wachsen
+# rep0st
 
 Das ist die Weiterführung von rep0st von User mopsalarm (https://github.com/mopsalarm/rep0st). Eine laufende Kopie steht under http://rep0st.rene8888.at zur Verfügung.
 

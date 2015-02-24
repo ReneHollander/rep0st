@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>rep0st Ergebnisse</title>
+
+    <style>
+        body {
+            background: #161618;
+            color: white;
+
+            max-width: 60em;
+        }
+
+        body, input {
+            font-family: sans-serif;
+        }
+
+        h1, h2 {
+            margin-top: 1.5em;
+        }
+
+        h1 {
+            color: #ee4d2e;
+        }
+
+        .result-list a {
+            display: inline-block;
+            width: 7em;
+            height: 7em;
+            background: rgba(0,0,0,0.8) 50% no-repeat;
+            background-size: contain;
+        }
+    </style>
+</head>
+<body>
+
+<h1>rep0st</h1>
+
+<p>
+    Auf rep0st kannst du gucken, ob es bereits ein optisch ähnliches Bild
+    zu deinem nächsten Upload gibt und so Minusbenis verhindern.
+</p>
+
+<p>
+    Die Suche ist natürlich nicht perfekt. Wenn kein ähnliches Bild gefunden
+    wurde, heißt das nicht, dass heute kein rep0st deinen Keller verlassen wird.
+    Findest du unter den Ergebnissen jedoch dein Upload und lädst das Bild trotdem
+    hoch, so ist Minusbenis nicht mehr weit.
+</p>
+
+<p>
+    <strong>rep0st durchsucht nur sfw und nsfw. nfsl wird nicht überprüft!</strong>
+</p>
+
+{% if results %}
+    <h2>Ergebnisse</h2>
+    <p>Diese Bilder sind deiner Anfrange am ähnlichsten</p>
+    <div class="result-list">
+        {% for result in results %}
+            <a href="http://pr0gramm.com/new/{{result.id}}"
+                style="background-image:url(http://img.pr0gramm.com/{{result.image}});">
+            </a>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<h2>Suche</h2>
+
+<p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
+<p>
+    <strong>Keine webm oder gif!</strong>
+</p>
+
+<form action="/" method="post" enctype="multipart/form-data">
+    <input name="image" type="file">
+    <input type="submit" value="rep0st?">
+</form>
+
+</body>
+</html>

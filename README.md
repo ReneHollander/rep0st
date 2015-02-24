@@ -34,6 +34,9 @@ env/bin/python -m rep0st.download
 env/bin/python -m rep0st.analyze
 ```
 
+## Pull Requests
+Sind Willkommen!
+
 ## Lizenz
 The MIT License (MIT)
 

@@ -3,6 +3,7 @@
 Das ist die Weiterführung von rep0st von User mopsalarm (https://github.com/mopsalarm/rep0st). Eine laufende Kopie steht under http://rep0st.rene8888.at zur Verfügung.
 
 ## Entwicklungsumgebung aufsetzen
+VirtualBox installieren: https://www.virtualbox.org/  
 Vagrant installieren: https://www.vagrantup.com/  
 
 VM aufsetzen und provisionieren: (Dauerte bei mir ca 20 Minuten)

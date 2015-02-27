@@ -34,6 +34,7 @@ class ImageSearch(object):
             self.mapping.append(idx)
 
         logbook.info("initialized with {} features", len(self.mapping))
+        self.lastIndexedPost = self.mapping[len(self.mapping) - 1]
 
         self.flann.train()
         logbook.info("training finished")
@@ -60,7 +61,6 @@ def make_webapp():
     search = create_image_search()
     posts = rep0st.download.open_dataset()["posts"]
     tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../templates')
-    print tmpl_dir
     app = flask.Flask(__name__, template_folder=tmpl_dir)
 
     @app.route("/", methods=["POST"])
@@ -85,13 +85,12 @@ def make_webapp():
 
             results.append(rep0st.download.Post(**post))
 
-        return flask.render_template("results.html", results=results)
+        return flask.render_template("results.html", results=results, lastIndexedPost=search.lastIndexedPost)
 
 
     @app.route("/", methods=["GET"])
     def index():
-        print "it works"
-        return flask.render_template("results.html", results=None)
+        return flask.render_template("results.html", results=None, lastIndexedPost=search.lastIndexedPost)
 
     return app
 

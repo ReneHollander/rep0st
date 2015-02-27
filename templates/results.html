@@ -1,81 +1,81 @@
 <!DOCTYPE html>
 <html>
 <head lang="en">
-    <meta charset="UTF-8">
-    <title>rep0st Ergebnisse</title>
+  <meta charset="UTF-8">
+  <title>rep0st Ergebnisse</title>
+  <style>
+  body {
+    background: #161618;
+    color: white;
+    max-width: 60em;
+  }
+  body, input {
+    font-family: sans-serif;
+  }
+  h1, h2 {
+    margin-top: 1.5em;
+  }
+  h1 {
+    color: #ee4d2e;
+  }
+  .result-list a {
+    display: inline-block;
+    width: 7em;
+    height: 7em;
+    background: rgba(0,0,0,0.8) 50% no-repeat;
+    background-size: contain;
+  }
 
-    <style>
-        body {
-            background: #161618;
-            color: white;
-
-            max-width: 60em;
-        }
-
-        body, input {
-            font-family: sans-serif;
-        }
-
-        h1, h2 {
-            margin-top: 1.5em;
-        }
-
-        h1 {
-            color: #ee4d2e;
-        }
-
-        .result-list a {
-            display: inline-block;
-            width: 7em;
-            height: 7em;
-            background: rgba(0,0,0,0.8) 50% no-repeat;
-            background-size: contain;
-        }
-    </style>
+  a:visited {
+    color: #FFFFFF;
+  }
+  </style>
 </head>
 <body>
-
-<h1>rep0st</h1>
-
-<p>
-    Auf rep0st kannst du gucken, ob es bereits ein optisch ähnliches Bild
-    zu deinem nächsten Upload gibt und so Minusbenis verhindern.
-</p>
-
-<p>
+  <h1>rep0st</h1>
+  <p>
+    rep0st minimiert das Risiko von Benisverkürzungen durch Reposts. Mithilfe unserer Skalarwellentechnologie
+    wurden alle Bilder die je auf dem pr0gramm gepostet wurden auf dem im pr0gramm Hauptquartier befindlichen
+    SNASA Cluster aufbereitet und indexiert. Mithilfe von reichlich Magie wird dann dein Bild mit der Datenbank
+    verglichen. Angezeigt werden dann Bilder die deinem Bild änlich sind! (Kann p0rn und g0re enthalten!)
+  </p>
+  <p>
     Die Suche ist natürlich nicht perfekt. Wenn kein ähnliches Bild gefunden
     wurde, heißt das nicht, dass heute kein rep0st deinen Keller verlassen wird.
-    Findest du unter den Ergebnissen jedoch dein Upload und lädst das Bild trotdem
+    Findest du unter den Ergebnissen jedoch dein Upload und lädst das Bild trotzdem
     hoch, so ist Minusbenis nicht mehr weit.
-</p>
+  </p>
+  <p>
+    Sourcecode: <a href="https://github.com/ReneHollander/rep0st">github.com/ReneHollander/rep0st</a><br>
+    Momentaner Maintainer: <a href="http://pr0gramm.com/user/Rene8888">/user/Rene8888</a>.
+    <br><br>
+    Die meiste Arbeit an dem Tool stammt von <a href="http://pr0gramm.com/user/mopsalarm">/user/mopsalarm</a>. Dies ist
+    die weiterführung seines Projekts! Relatierter Post: <a href="http://pr0gramm.com/top/613715">/top/613715</a>.
 
-<p>
-    <strong>rep0st durchsucht nur sfw und nsfw. nsfl wird nicht überprüft!</strong>
-</p>
+  </p>
+  <p>
+    Durchsucht werden alle sfw, nsfw und nsfl Bilder von <strong>1-{{lastIndexedPost}}</strong>.<br>
+    Für Benisverkürzungen die durch nicht erkannte Reposts entstanden sind können wir nicht haften!
+  </p>
 
-{% if results %}
+  {% if results %}
     <h2>Ergebnisse</h2>
-    <p>Diese Bilder sind deiner Anfrange am ähnlichsten</p>
+    <p>Diese Bilder sind deiner Anfrange am ähnlichsten:</p>
     <div class="result-list">
-        {% for result in results %}
-            <a href="http://pr0gramm.com/new/{{result.id}}"
-                style="background-image:url(http://img.pr0gramm.com/{{result.image}});">
-            </a>
-        {% endfor %}
+      {% for result in results %}
+      <a href="http://pr0gramm.com/new/{{result.id}}" style="background-image:url(http://img.pr0gramm.com/{{result.image}});"></a>
+      {% endfor %}
     </div>
-{% endif %}
+  {% endif %}
 
-<h2>Suche</h2>
-
-<p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
-<p>
+  <h2>Suche</h2>
+  <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
+  <p>
     <strong>Keine webm oder gif!</strong>
-</p>
-
-<form action="/" method="post" enctype="multipart/form-data">
+  </p>
+  <form action="/" method="post" enctype="multipart/form-data">
     <input name="image" type="file">
     <input type="submit" value="rep0st?">
-</form>
-
+  </form>
 </body>
 </html>

@@ -24,7 +24,7 @@ def build_feature_vector_for_image(image):
     hue = scaled[:, :, 0] / 2
     sat = scaled[:, :, 1]
     val = scaled[:, :, 2]
-
+    
     # concat channels for feature vector
     return numpy.hstack((hue.flat, sat.flat, val.flat))
 

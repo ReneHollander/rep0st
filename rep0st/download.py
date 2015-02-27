@@ -67,7 +67,7 @@ def iter_api_posts(start=None):
 
     while not at_end and start != 1:
         # build url for next page
-        url = "http://pr0gramm.com/api/items/get?flags=3"
+        url = "http://pr0gramm.com/api/items/get?flags=7"
         if start is not None:
             url += "&older=%d" % start
 

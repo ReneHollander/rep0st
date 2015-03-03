@@ -6,11 +6,14 @@
   <style>
   body {
     background: #161618;
-    color: white;
+    color: #f2f5f4;
     max-width: 60em;
+    width: 788px;
+    margin: 0 auto;
   }
   body, input {
     font-family: sans-serif;
+    border: 0px none;
   }
   h1, h2 {
     margin-top: 1.5em;
@@ -26,12 +29,32 @@
     background-size: contain;
   }
 
-  a {
-    color: #ee4d2e;
+  a, a:visited {
+    color: #75c0c7;
+    text-decoration: none;
   }
 
-  a:visited {
-    color: #FFFFFF;
+  a:active, a:hover {
+    color: #f5f7f6;
+  }
+
+  #search {
+    margin-top: 20px;;
+    color: #ccc;
+    border: 1px solid #ee4d2e;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.03)
+  }
+  #search > h2 {
+    margin-top: 0;
+  }
+  input[type="button"], input[type="submit"] {
+    text-align: center;
+    padding: 4px 8px;
+    color: #f5f7f6;
+    cursor: pointer;
+    background-color: #ee4d2e;
+    font-size: 12px;
   }
   </style>
 </head>
@@ -72,14 +95,16 @@
     </div>
   {% endif %}
 
-  <h2>Suche</h2>
-  <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
-  <p>
-    <strong>Keine webm oder gif!</strong>
-  </p>
-  <form action="/" method="post" enctype="multipart/form-data">
-    <input name="image" type="file">
-    <input type="submit" value="rep0st?">
-  </form>
+  <div id="search">
+    <h2>Suche</h2>
+    <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
+    <p>
+      <strong>Keine webm oder gif!</strong>
+    </p>
+    <form action="/" method="post" enctype="multipart/form-data">
+      <input name="image" type="file">
+      <input type="submit" value="rep0st?">
+    </form>
+  </div>
 </body>
 </html>

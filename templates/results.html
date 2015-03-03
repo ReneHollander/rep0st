@@ -33,6 +33,17 @@
   a:visited {
     color: #FFFFFF;
   }
+
+  #search {
+    margin-top: 20px;;
+    color: #CCC;
+    border: 1px solid #EE4D2E;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.03)
+  }
+  #search > h2 {
+    margin-top: 0;
+  }
   </style>
 </head>
 <body>
@@ -72,14 +83,16 @@
     </div>
   {% endif %}
 
-  <h2>Suche</h2>
-  <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
-  <p>
-    <strong>Keine webm oder gif!</strong>
-  </p>
-  <form action="/" method="post" enctype="multipart/form-data">
-    <input name="image" type="file">
-    <input type="submit" value="rep0st?">
-  </form>
+  <div id="search">
+    <h2>Suche</h2>
+    <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
+    <p>
+      <strong>Keine webm oder gif!</strong>
+    </p>
+    <form action="/" method="post" enctype="multipart/form-data">
+      <input name="image" type="file">
+      <input type="submit" value="rep0st?">
+    </form>
+  </div>
 </body>
 </html>

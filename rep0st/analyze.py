@@ -24,7 +24,7 @@ def build_feature_vector_for_image(image):
     hue = scaled[:, :, 0] / 2
     sat = scaled[:, :, 1]
     val = scaled[:, :, 2]
-    
+
     # concat channels for feature vector
     return numpy.hstack((hue.flat, sat.flat, val.flat))
 
@@ -60,6 +60,9 @@ def mmap_feature_file():
     return numpy.memmap("env/data/features.np", mode="r+",
                         dtype=numpy.uint8, shape=(1000000, 1 + 3 * 36))
 
+def close_feature_file(features):
+    print "closing feature file"
+    features._mmap.close();
 
 # noinspection PyBroadException
 def build_feature_vector_wrapper(target, post):

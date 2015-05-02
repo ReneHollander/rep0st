@@ -38,16 +38,17 @@
     color: #f5f7f6;
   }
 
-  #search {
+  #box {
     margin-top: 20px;;
     color: #ccc;
     border: 1px solid #ee4d2e;
     padding: 20px;
     background-color: rgba(255, 255, 255, 0.03)
   }
-  #search > h2 {
+  #box > h2 {
     margin-top: 0;
   }
+
   input[type="button"], input[type="submit"] {
     text-align: center;
     padding: 4px 8px;
@@ -55,6 +56,10 @@
     cursor: pointer;
     background-color: #ee4d2e;
     font-size: 12px;
+  }
+  input {
+    margin-top: 2px;
+    margin-bottom: 2px;
   }
   </style>
 </head>
@@ -84,6 +89,13 @@
     Für Benisverkürzungen, die durch nicht erkannte Reposts entstanden sind, können wir nicht haften!
   </p>
 
+  {% if error %}
+    <div id="box">
+      <h2>An Error occured</h2>
+      {{error}}
+    </div>
+  {% endif %}
+
   {% if results %}
     <h2>Ergebnisse</h2>
     <p>Diese Bilder sind deiner Anfrange am ähnlichsten:</p>
@@ -94,14 +106,16 @@
     </div>
   {% endif %}
 
-  <div id="search">
+  <div id="box">
     <h2>Suche</h2>
     <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
     <p>
       <strong>Keine webm oder gif!</strong>
     </p>
     <form action="/" method="post" enctype="multipart/form-data">
-      <input name="image" type="file">
+      Bild:<input name="image" type="file"><br>
+      oder<br>
+      URL:<input name="url" type="text"><br>
       <input type="submit" value="rep0st?">
     </form>
   </div>

@@ -58,7 +58,7 @@ def mmap_feature_file():
     """Maps the features.np in memory. The file must already exist"""
     print os.getcwd()
     return numpy.memmap("env/data/features.np", mode="r+",
-                        dtype=numpy.uint8, shape=(1000000, 1 + 3 * 36))
+                        dtype=numpy.uint8, shape=(2000000, 1 + 3 * 36))
 
 def close_feature_file(features):
     print "closing feature file"

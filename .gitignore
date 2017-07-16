@@ -1,0 +1,6 @@
+*.sql
+*.ann
+*.gz
+.idea/
+__pycache__
+*.pyc

@@ -3,7 +3,6 @@ import os
 import cv2
 import numpy
 import redis
-# TODO install requests module on vm
 import requests
 from flask import Flask
 from flask import render_template
@@ -62,7 +61,7 @@ def check_image(imagedata):
             return render_template("index.html", error="Ungueltiges Bild!")
 
         images = rep.get_index().search(image)
-        posts = [images[a].similarity for a in range(len(images))]
+        posts = [images[a].post for a in range(len(images))]
         return render_template("index.html", images=posts)
     except Exception as ex:
         return render_template("index.html", error="Unbekannter Fehler: " + str(ex))
@@ -78,4 +77,3 @@ def fileValid(ifile):
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
-

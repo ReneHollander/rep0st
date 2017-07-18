@@ -62,7 +62,7 @@ class Rep0stIndex:
         list = []
         for item in nearest:
             post = self.rep0st.database.get_post_by_id(item.value)
-            list.append(SearchResult(item.priority, post))
+            list.append(SearchResult(post, item.priority))
 
         return list
 

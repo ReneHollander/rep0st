@@ -113,7 +113,7 @@ class rep0st():
                 'last_redis_update': datetime.datetime.now(),
             },
             'user': {
-                'last_our': 10,
+                'last_hour': 10,
                 'last_day': 100,
                 'total': 10000,
             }

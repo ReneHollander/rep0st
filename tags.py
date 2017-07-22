@@ -1,20 +1,12 @@
-import sys
-
-import redis
-from logbook import StreamHandler, Logger
-from sqlalchemy import create_engine
+from logbook import Logger
 
 import api
+import config
 import util
-from rep0st import rep0st
 
-StreamHandler(sys.stdout).push_application()
 log = Logger('APP')
 
-rep = rep0st(
-    create_engine('mysql+cymysql://rep0st:rep0stpw@localhost/rep0st?charset=utf8'),
-    redis.StrictRedis(host='localhost', port=6379, db=0),
-    "/media/pr0gramm/images")
+rep = config.create_rep0st()
 
 counter = 0
 for batch in util.batch(10000, api.iterate_tags(start=rep.database.latest_tag_id())):

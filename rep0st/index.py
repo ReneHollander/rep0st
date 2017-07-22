@@ -6,9 +6,9 @@ from annoy import AnnoyIndex
 from logbook import Logger
 
 import config
-from analyze import analyze_image
-from database import FeatureType
-from util import SimplePriorityQueue, dist
+from rep0st.analyze import analyze_image
+from rep0st.database import FeatureType
+from rep0st.util import SimplePriorityQueue, dist
 
 log = Logger('index')
 

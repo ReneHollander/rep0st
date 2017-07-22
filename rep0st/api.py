@@ -3,7 +3,7 @@ from datetime import datetime
 import requests
 from logbook import Logger
 
-from database import Post, PostType, Tag
+from rep0st.database import Post, PostType, Tag
 
 log = Logger('pr0gramm API')
 

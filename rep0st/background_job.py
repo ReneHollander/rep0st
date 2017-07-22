@@ -7,14 +7,13 @@ import schedule
 from annoy import AnnoyIndex
 from logbook import Logger
 
-import analyze
-import api
 import config
-from database import PostStatus, Feature, FeatureType, PostType
+from rep0st import api, analyze
+from rep0st.database import PostStatus, Feature, FeatureType, PostType
 
 log = Logger('background-job')
 
-rep = config.create_rep0st()
+rep = config.get_rep0st()
 
 current_index = 1
 

@@ -2,23 +2,17 @@ import os
 
 import cv2
 import numpy
-import redis
 import requests
-import config
 from flask import Flask
 from flask import render_template
 from flask import request
-from sqlalchemy import create_engine
 
-from rep0st import rep0st
+import config
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates', static_folder='static')
 
-# rep = rep0st(
-#     create_engine('mysql+cymysql://rep0st:rep0stpw@localhost/rep0st?charset=utf8'),
-#     redis.StrictRedis(host='localhost', port=6379, db=0),
-#     "/media/pr0gramm/images")
-rep = config.create_rep0st()
+rep = config.get_rep0st()
+
 
 @app.route("/", methods=["GET"])
 def starting_page():
@@ -75,7 +69,8 @@ def fileValid(ifile):
     ifile.seek(0)
     return True
 
-def custom_render_template(error = None, images = None):
+
+def custom_render_template(error=None, images=None):
     return render_template("index.html", error=error, images=images, stats=rep.get_statistics())
 
 

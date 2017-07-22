@@ -5,7 +5,7 @@ import cv2
 import numpy
 import pywt
 
-from database import FeatureType
+from rep0st.database import FeatureType
 
 
 class Analyzer(ABC):
@@ -35,18 +35,6 @@ class FeatureVectorAnalyzer(Analyzer):
 
         # concat channels for feature vector
         return numpy.hstack((hue.flat, sat.flat, val.flat))
-
-        # scaled = cv2.resize(image, (6, 6), interpolation=cv2.INTER_AREA)
-        # scaled = cv2.cvtColor(scaled, cv2.COLOR_BGR2HSV)
-        #
-        # # extract image channels
-        # hue_sin = (numpy.sin(scaled[:, :, 0] / (255.0 / (2 * numpy.math.pi))) * 128 + 128).astype(numpy.uint8)
-        # hue_cos = (numpy.cos(scaled[:, :, 0] / (255.0 / (2 * numpy.math.pi))) * 128 + 128).astype(numpy.uint8)
-        # sat = scaled[:, :, 1]
-        # val = scaled[:, :, 2]
-        #
-        # # concat channels for feature vector
-        # return numpy.hstack((hue_sin.flat, hue_cos.flat, sat.flat, val.flat))
 
 
 class AverageHashAnalyzer(Analyzer):

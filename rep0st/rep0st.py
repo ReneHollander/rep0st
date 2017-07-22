@@ -9,12 +9,11 @@ import numpy as np
 from logbook import Logger
 from requests import HTTPError
 
-import analyze
-import util
-from api import iterate_posts, download_image
-from database import Database, PostStatus, Feature
-from index import Rep0stIndex
-from util import batched_pool_runner
+from rep0st import util, analyze
+from rep0st.api import iterate_posts, download_image
+from rep0st.database import Database, PostStatus, Feature
+from rep0st.index import Rep0stIndex
+from rep0st.util import batched_pool_runner
 
 log = Logger('rep0st')
 

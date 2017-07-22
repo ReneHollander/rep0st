@@ -32,6 +32,12 @@ image_config = {
     'path': '/media/pr0gramm/images',
 }
 
+backgroundjob_config = {
+    'dev_mode': True,
+    'rebuild_index_time': '03:00',
+    'update_index_every_seconds': 60,
+}
+
 log_handlers = [
     logbook.StreamHandler(sys.stdout, level=logbook.INFO),
     logbook.TimedRotatingFileHandler('logs/rep0st.log', date_format='%d-%m-%Y', bubble=True, level=logbook.DEBUG),

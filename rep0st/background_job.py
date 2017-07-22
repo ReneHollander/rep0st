@@ -108,9 +108,11 @@ if __name__ == '__main__':
 
     job_build_index()
 
-    # schedule.every().day.at("03:00").do(job_build_index)
-    schedule.every(5).minutes.do(job_build_index)
-    schedule.every(1).minutes.do(job_update)
+    if config.backgroundjob_config['dev_mode']:
+        schedule.every(5).minutes.do(job_build_index)
+    else:
+        schedule.every().day.at(config.backgroundjob_config['rebuild_index_time']).do(job_build_index)
+    schedule.every(config.backgroundjob_config['update_index_every_seconds']).seconds.do(job_update)
 
     while True:
         schedule.run_pending()

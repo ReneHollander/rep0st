@@ -1,16 +1,14 @@
 from collections import namedtuple
-from logging import Logger
 
 import msgpack
-import msgpack_numpy
 import numpy as np
 from annoy import AnnoyIndex
+from logbook import Logger
 
+import config
 from analyze import analyze_image
 from database import FeatureType
 from util import SimplePriorityQueue, dist
-
-msgpack_numpy.patch()
 
 log = Logger('index')
 
@@ -24,28 +22,36 @@ class Rep0stIndex:
         self.p.subscribe(**{'rep0st-index-change': self.index_change_handler})
         self.listenthread = self.p.run_in_thread(sleep_time=0.001)
         self.current_index = int(self.rep0st.redis.get('rep0st-current-index'))
+        log.info("loading index initial index with id {}", self.current_index)
         self.annoy_index = None
         self.load_index(self.current_index)
 
     def index_change_handler(self, message):
-        print(message)
+        next_index = int(message['data'])
+        log.info("recieved index update. new index: {}", next_index)
+        self.load_index(next_index)
 
     def load_index(self, index_id):
-        if self.annoy_index is not None:
-            self.annoy_index.unload()
-
+        log.info("switching index from {} to {}", self.current_index, index_id)
         newindex = AnnoyIndex(108, metric='euclidean')
         newindex.load('index_' + str(index_id) + '.ann')
+        if self.annoy_index is not None:
+            self.annoy_index.unload()
         self.annoy_index = newindex
         self.current_index = index_id
+        log.info("finished switching index. now using index {}", self.current_index)
 
-    def search(self, image, k=20):
+    def search(self, image, k=-1):
+        if k == -1:
+            k = config.index_config['default_k']
+
         nearest = SimplePriorityQueue(k)
 
         fv = analyze_image(image)[FeatureType.FEATURE_VECTOR]
         arr = np.asarray(bytearray(fv)).astype(np.float32)
 
-        annoy_results = self.annoy_index.get_nns_by_vector(arr, k, search_k=5000, include_distances=True)
+        annoy_results = self.annoy_index.get_nns_by_vector(arr, k, search_k=config.index_config['search_k'],
+                                                           include_distances=True)
 
         for i in range(0, len(annoy_results[0])):
             a_p = annoy_results[1][i]

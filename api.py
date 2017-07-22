@@ -12,7 +12,7 @@ def iterate_posts(start=0):
     at_start = False
 
     while not at_start:
-        url = "http://pr0gramm.com/api/items/get?flags=7&newer=%d" % start
+        url = "http://pr0gramm.com/api/items/get?flags=15&newer=%d" % start
 
         log.debug("requesting api page {}", url)
         response = requests.get(url)

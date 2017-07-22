@@ -94,7 +94,7 @@ class rep0st():
             return post, result
 
     def get_index(self):
-        if self.index == None:
+        if self.index is None:
             self.index = Rep0stIndex(self)
         return self.index
 
@@ -102,6 +102,22 @@ class rep0st():
         if self.index:
             self.index.close()
         self.database.close()
+
+    def get_statistics(self):
+        index_id = self.index.current_index if self.index else -1
+        return {
+            'index': {
+                'current': index_id,
+                'latest_post': self.database.latest_post_id(),
+                'last_annoy_update': datetime.datetime.now(),
+                'last_redis_update': datetime.datetime.now(),
+            },
+            'user': {
+                'last_our': 10,
+                'last_day': 100,
+                'total': 10000,
+            }
+        }
 
 
 def read_image(imgdir, database, post):

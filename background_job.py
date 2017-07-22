@@ -1,30 +1,20 @@
 import datetime
-import sys
 import time
 
 import msgpack
-import msgpack_numpy
 import numpy as np
-import redis
 import schedule
 from annoy import AnnoyIndex
-from logbook import Logger, StreamHandler
-from sqlalchemy import create_engine
+from logbook import Logger
 
 import analyze
 import api
+import config
 from database import PostStatus, Feature, FeatureType, PostType
-from rep0st import rep0st
 
-StreamHandler(sys.stdout).push_application()
 log = Logger('background-job')
 
-msgpack_numpy.patch()
-
-rep = rep0st(
-    create_engine('mysql+cymysql://rep0st:rep0stpw@localhost/rep0st?charset=utf8'),
-    redis.StrictRedis(host='localhost', port=6379, db=0),
-    "/media/pr0gramm/images")
+rep = config.create_rep0st()
 
 current_index = 1
 
@@ -64,7 +54,7 @@ def update(index_id):
 
 
 def build_index(index_id):
-    n_trees = 20
+    n_trees = config.index_config['tree_count']
 
     log.info("started index build")
     count = rep.database.session.query(Feature).filter(Feature.type == FeatureType.FEATURE_VECTOR).count()
@@ -112,7 +102,6 @@ def job_update():
 if __name__ == '__main__':
     if rep.redis.exists('rep0st-current-index'):
         current_index = int(rep.redis.get('rep0st-current-index'))
-        print(type(current_index))
         log.info("reusing index id {} for cycling", current_index)
     else:
         current_index = 2

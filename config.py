@@ -4,7 +4,7 @@ import sys
 import logbook
 import msgpack_numpy
 import redis
-from logbook.compat import redirect_logging
+from logbook.compat import RedirectLoggingHandler
 from sqlalchemy import create_engine
 
 from rep0st.rep0st import rep0st
@@ -23,9 +23,9 @@ redis_config = {
 }
 
 index_config = {
-    'search_k': 5000,
+    'search_k': 10000,
     'tree_count': 20,
-    'default_k': 20,
+    'default_k': 25,
 }
 
 image_config = {
@@ -67,8 +67,10 @@ def load():
         msgpack_numpy.patch()
 
         # Redirect flask logger to logbook
-        redirect_logging()
         werkzeug_logger = logging.getLogger('werkzeug')
+        del werkzeug_logger.handlers[:]
+        werkzeug_logger.addHandler(RedirectLoggingHandler())
+
         # Override the built-in werkzeug logging function in order to change the log line format.
         from werkzeug.serving import WSGIRequestHandler
         WSGIRequestHandler.log = lambda self, type, message, *args: getattr(werkzeug_logger, 'debug')(

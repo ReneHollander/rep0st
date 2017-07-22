@@ -1,13 +1,13 @@
 <html xmlns:width="http://www.w3.org/1999/xhtml">
 <head>
     <title>
-        Rep0st
+        rep0st
     </title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylesheet.css') }}">
 </head>
 <body>
 
-<h1>Rep0st</h1>
+<h1>rep0st</h1>
 <h2 id="test"></h2>
 
 
@@ -42,11 +42,11 @@
 </div>
 {% endif %}
 
-{% if images %}
+{% if search_results %}
 <h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
 <div class="result-list">
-    {% for image in images %}
-    <a href="https://pr0gramm.com/new/{{image.id}}" style="background-image:url(https://img.pr0gramm.com/{{image.image}});" target="_blank"></a>
+    {% for search_result in search_results %}
+    <a href="https://pr0gramm.com/new/{{search_result.post.id}}" style="background-image:url(https://img.pr0gramm.com/{{search_result.post.image}});" target="_blank"></a>
     <!--<img src="https://img.pr0gramm.com/{{image}}" />-->
     {% endfor %}
 </div>
@@ -60,9 +60,9 @@
     </p>
     <form action="/" method="post" enctype="multipart/form-data">
         <!--<fieldset>-->
-        <input type="checkbox" id="sfw" name="filter" value="sfw"/><label for="sfw"> sfw</label>
-        <input type="checkbox" id="nsfw" name="filter" value="nsfw"/> <label for="nsfw"> nsfw</label>
-        <input type="checkbox" id="nsfl" name="filter" value="nsfl"/> <label for="nsfl"> nsfl</label>
+        <input type="checkbox" id="sfw" name="filter" value="sfw" checked/><label for="sfw"> sfw</label>
+        <input type="checkbox" id="nsfw" name="filter" value="nsfw" checked/> <label for="nsfw"> nsfw</label>
+        <input type="checkbox" id="nsfl" name="filter" value="nsfl" checked/> <label for="nsfl"> nsfl</label>
         <p/>
         <!--</fieldset>-->
 

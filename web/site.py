@@ -12,6 +12,7 @@ import config
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 rep = config.get_rep0st()
+rep.get_index()
 
 
 @app.route("/", methods=["GET"])
@@ -24,42 +25,60 @@ def search():
     url = request.form.get("url")
     image = request.files.get("image")
 
+    search_results = None
+    error = None
+    curr_image = None
+
     if url != "" and image.filename != "":
-        return custom_render_template(error="Man kann nicht ein Bild und eine URL angeben!")
+        error = "Man kann nicht ein Bild und eine URL angeben!"
     else:
         try:
             if url != "":
-                return check_url(url)
+                if check_url(url):
+                    curr_image = get_image_from_url(url)
+                else:
+                    error = "Ungueltige URL!"
             elif fileValid(image):
-                return check_image(numpy.fromstring(image.read(), numpy.uint8))
+                curr_image = numpy.fromstring(image.read(), numpy.uint8)
             else:
-                return custom_render_template(error="Keine URL oder Bild angegeben!")
+                error = "Keine URL oder Bild angegeben!"
         except Exception as ex:
-            custom_render_template(error="Ein unbekannter Fehler " + str(ex))
+            error = "Ein unbekannter Fehler " + str(ex)
+
+        if error is None and curr_image is not None:
+            if check_image(curr_image):
+                curr_image = cv2.imdecode(curr_image, cv2.IMREAD_COLOR)
+                search_results = rep.get_index().search(curr_image)
+
+            else:
+                error = "Ungueltiges Bild"
+
+    return custom_render_template(error=error, search_results=search_results)
 
 
 def check_url(url):
     try:
-        resp = requests.get(url)
+        requests.get(url)
     except:
-        return custom_render_template(error="Ungueltige URL!")
+        return False
+    return True
 
+
+def get_image_from_url(url):
+    resp = requests.get(url)
     resp.raise_for_status()
     content = resp.content
-    return check_image(numpy.asarray(bytearray(content), dtype=numpy.uint8))
+    return numpy.asarray(bytearray(content), dtype=numpy.uint8)
 
 
 def check_image(imagedata):
     try:
         image = cv2.imdecode(imagedata, cv2.IMREAD_COLOR)
         if (type(image) != numpy.ndarray):
-            return custom_render_template(error="Ungueltiges Bild!")
-
-        images = rep.get_index().search(image)
-        posts = [images[a].post for a in range(len(images))]
-        return custom_render_template(images=posts)
+            return False
+        return True
     except Exception as ex:
-        return custom_render_template(error="Unbekannter Fehler: " + str(ex))
+        return False
 
 
 def fileValid(ifile):
@@ -70,8 +89,8 @@ def fileValid(ifile):
     return True
 
 
-def custom_render_template(error=None, images=None):
-    return render_template("index.html", error=error, images=images, stats=rep.get_statistics())
+def custom_render_template(error=None, search_results=None):
+    return render_template("index.html", error=error, search_results=search_results, stats=rep.get_statistics())
 
 
 if __name__ == "__main__":

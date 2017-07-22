@@ -1,4 +1,5 @@
 from collections import namedtuple
+from time import time
 
 import msgpack
 import numpy as np
@@ -33,7 +34,7 @@ class Rep0stIndex:
 
     def load_index(self, index_id):
         log.info("switching index from {} to {}", self.current_index, index_id)
-        newindex = AnnoyIndex(108, metric='euclidean')
+        newindex = AnnoyIndex(108, 'euclidean')
         newindex.load('index_' + str(index_id) + '.ann')
         if self.annoy_index is not None:
             self.annoy_index.unload()
@@ -42,6 +43,8 @@ class Rep0stIndex:
         log.info("finished switching index. now using index {}", self.current_index)
 
     def search(self, image, k=-1):
+        start = time()
+
         if k == -1:
             k = config.index_config['default_k']
 
@@ -69,6 +72,11 @@ class Rep0stIndex:
         for item in nearest:
             post = self.rep0st.database.get_post_by_id(item.value)
             list.append(SearchResult(post, item.priority))
+
+        stop = time()
+
+        log.debug("query with search_k={} and {} trees took {}ms", config.index_config['search_k'],
+                  config.index_config['tree_count'], str((stop - start) * 1000))
 
         return list
 

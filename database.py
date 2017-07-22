@@ -37,6 +37,13 @@ class PostStatus(enum.Enum):
     BROKEN = 3
 
 
+class Flag(enum.Enum):
+    SFW = 1
+    NSFW = 2
+    NSFL = 3
+    NSFP = 4
+
+
 class Post(Base):
     __tablename__ = 'post'
     id = Column(Integer, primary_key=True, index=True)
@@ -53,6 +60,39 @@ class Post(Base):
     type = Column(Enum(PostType), nullable=False, index=True)
     status = Column(Enum(PostStatus), nullable=False, index=True, default=PostStatus.NOT_INDEXED)
     __table_args__ = (Index('post_status_type_index', "status", "type"),)
+
+    def is_sfw(self):
+        return self.flags & 1 != 0
+
+    def is_nsfw(self):
+        return self.flags & 2 != 0
+
+    def is_nsfl(self):
+        return self.flags & 4 != 0
+
+    def is_nsfp(self):
+        return self.flags & 8 != 0
+
+    def get_flags(self):
+        flags = []
+        if self.is_sfw():
+            flags.append(Flag.SFW)
+        if self.is_nsfw():
+            flags.append(Flag.NSFW)
+        if self.is_nsfl():
+            flags.append(Flag.NSFL)
+        if self.is_nsfp():
+            flags.append(Flag.NSFP)
+        return flags
+
+    def get_flag_by_importance(self):
+        if self.is_nsfl():
+            return Flag.NSFL
+        if self.is_nsfw():
+            return Flag.NSFW
+        if self.is_nsfp():
+            return Flag.NSFP
+        return Flag.SFW
 
     def __str__(self):
         return "Post(id=" + str(self.id) + ")"

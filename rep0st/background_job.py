@@ -73,7 +73,7 @@ def build_index(index_id):
     log.info("building index with {} trees. this will take a while...", n_trees)
     start = time.time()
     index.build(20)
-    index_file = "index_" + str(index_id) + ".ann"
+    index_file = config.index_config['index_path'] + "index_" + str(index_id) + ".ann"
     log.info("saving index to file {}", index_file)
     index.save(index_file)
     stop = time.time()

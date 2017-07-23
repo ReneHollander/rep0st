@@ -25,6 +25,7 @@ redis_config = {
 }
 
 index_config = {
+    'index_path': './',
     'search_k': 10000,
     'tree_count': 20,
     'default_k': 25,

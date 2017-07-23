@@ -23,7 +23,6 @@ class Rep0stIndex:
         self.p.subscribe(**{'rep0st-index-change': self.index_change_handler})
         self.listenthread = self.p.run_in_thread(sleep_time=0.001)
         self.current_index = int(self.rep0st.redis.get('rep0st-current-index'))
-        log.info("loading index initial index with id {}", self.current_index)
         self.annoy_index = None
         self.load_index(self.current_index)
 
@@ -33,7 +32,11 @@ class Rep0stIndex:
         self.load_index(next_index)
 
     def load_index(self, index_id):
-        log.info("switching index from {} to {}", self.current_index, index_id)
+        if self.annoy_index is None:
+            log.info("loading initial index with id {}", self.current_index)
+        else:
+            log.info("switching index from {} to {}", self.current_index, index_id)
+
         newindex = AnnoyIndex(108, metric='euclidean')
         newindex.load('index_' + str(index_id) + '.ann')
         if self.annoy_index is not None:

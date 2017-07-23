@@ -57,7 +57,7 @@ def build_index(index_id):
 
     log.info("started index build")
     count = rep.database.session.query(Feature).filter(Feature.type == FeatureType.FEATURE_VECTOR).count()
-    index = AnnoyIndex(108, 'euclidean')
+    index = AnnoyIndex(108, metric='euclidean')
     cnt = 0
     log.info("adding {} features to index", count)
     start = time.time()

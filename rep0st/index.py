@@ -34,7 +34,7 @@ class Rep0stIndex:
 
     def load_index(self, index_id):
         log.info("switching index from {} to {}", self.current_index, index_id)
-        newindex = AnnoyIndex(108, 'euclidean')
+        newindex = AnnoyIndex(108, metric='euclidean')
         newindex.load('index_' + str(index_id) + '.ann')
         if self.annoy_index is not None:
             self.annoy_index.unload()

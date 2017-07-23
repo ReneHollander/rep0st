@@ -9,6 +9,8 @@ from sqlalchemy import create_engine
 
 from rep0st.rep0st import rep0st
 
+IS_PRODUCTION = False
+
 mysql_config = {
     'user': 'rep0st',
     'password': 'rep0stpw',
@@ -33,15 +35,20 @@ image_config = {
 }
 
 backgroundjob_config = {
-    'dev_mode': True,
     'rebuild_index_time': '03:00',
     'update_index_every_seconds': 60,
 }
 
-log_handlers = [
-    logbook.StreamHandler(sys.stdout, level=logbook.INFO),
-    logbook.TimedRotatingFileHandler('logs/rep0st.log', date_format='%d-%m-%Y', bubble=True, level=logbook.DEBUG),
-]
+if IS_PRODUCTION:
+    log_handlers = [
+        logbook.StreamHandler(sys.stdout, level=logbook.INFO),
+        logbook.TimedRotatingFileHandler('logs/rep0st.log', date_format='%d-%m-%Y', bubble=True, level=logbook.DEBUG),
+    ]
+else:
+    log_handlers = [
+        logbook.StreamHandler(sys.stdout, level=logbook.DEBUG),
+        logbook.TimedRotatingFileHandler('logs/rep0st.log', date_format='%d-%m-%Y', bubble=True, level=logbook.DEBUG),
+    ]
 
 rep0st_instance = None
 

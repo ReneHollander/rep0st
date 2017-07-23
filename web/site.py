@@ -12,7 +12,8 @@ import config
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 rep = config.get_rep0st()
-rep.get_index()
+if config.IS_PRODUCTION:
+    rep.get_index()
 
 
 @app.route("/", methods=["GET"])

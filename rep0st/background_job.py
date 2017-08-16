@@ -82,20 +82,26 @@ def build_index(index_id):
 
 
 def job_build_index():
-    global current_index
-    next_index = 2 if current_index == 1 else 1
-    log.info("current index is {}, next will be {}", current_index, next_index)
-    rep.update_database()
-    rep.update_features()
-    build_index(next_index)
-    rep.redis.delete('rep0st-latest-feature-vectors-index-' + str(next_index))
-    rep.redis.set('rep0st-current-index', next_index)
-    rep.redis.publish('rep0st-index-change', next_index)
-    current_index = next_index
+    try:
+        global current_index
+        next_index = 2 if current_index == 1 else 1
+        log.info("current index is {}, next will be {}", current_index, next_index)
+        rep.update_database()
+        rep.update_features()
+        build_index(next_index)
+        rep.redis.delete('rep0st-latest-feature-vectors-index-' + str(next_index))
+        rep.redis.set('rep0st-current-index', next_index)
+        rep.redis.publish('rep0st-index-change', next_index)
+        current_index = next_index
+    except:
+        log.error('Error executing job_build_index', exc_info=True)
 
 
 def job_update():
-    update(current_index)
+    try:
+        update(current_index)
+    except:
+        log.error('Error executing job_update', exc_info=True)
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@
         rep0st
     </title>
     <link rel="icon" href="{{ url_for('static', filename='images/rep0st-favicon.png') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylesheet.css') }}">
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
 </head>
 <body>
 
@@ -47,8 +47,7 @@
 <h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
 <div class="result-list">
     {% for search_result in search_results %}
-    <a href="https://pr0gramm.com/new/{{search_result.post.id}}" style="background-image:url(https://img.pr0gramm.com/{{search_result.post.image}});" target="_blank"></a>
-    <!--<img src="https://img.pr0gramm.com/{{image}}" />-->
+    <a href="http://pr0gramm.com/new/{{search_result.post.id"><img src="http://img.pr0gramm.com/{{search_result.post.image}}" class="thumbnail" height="100" width="100" /></a>
     {% endfor %}
 </div>
 {% endif %}

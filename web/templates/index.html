@@ -46,10 +46,11 @@
 {% if search_results %}
 <h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
 <div class="result-list">
+    <ul class="enlarge">
     {% for search_result in search_results %}
-    <a href="https://pr0gramm.com/new/{{search_result.post.id}}" style="background-image:url(https://img.pr0gramm.com/{{search_result.post.image}});" target="_blank"></a>
-    <!--<img src="https://img.pr0gramm.com/{{image}}" />-->
+    <li><img src="https://thumb.pr0gramm.com/{{search_result.post.image}}" width="150px" height="100px"/><span><img src="https://img.pr0gramm.com/{{search_result.post.image}}"/><br /></span></li>
     {% endfor %}
+    </ul>
 </div>
 {% endif %}
 

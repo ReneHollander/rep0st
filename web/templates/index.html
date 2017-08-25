@@ -4,7 +4,7 @@
         rep0st
     </title>
     <link rel="icon" href="{{ url_for('static', filename='images/rep0st-favicon.png') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylesheet.css') }}">
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
 </head>
 <body>
 
@@ -29,10 +29,10 @@
     Momentaner Maintainer: <a href="https://pr0gramm.com/user/Rene8888">/user/Rene8888</a>.
     <br><br>
     Die meiste Arbeit an dem Tool stammt von <a href="https://pr0gramm.com/user/mopsalarm">/user/mopsalarm</a>. Dies ist
-    die weiterführung seines Projekts! Relatierter Post: <a href="https://pr0gramm.com/top/613715">/top/613715</a>.
+    die Weiterführung seines Projekts! Relatierter Post: <a href="https://pr0gramm.com/top/613715">/top/613715</a>.
 </p>
 <p>
-    Durchsucht werden alle sfw, nsfw und nsfl Bilder von <strong>1-{{stats["index"]["latest_post"]}}</strong>.<br>
+    Durchsucht werden alle SFW, NSFW und NSFL Bilder von <strong>1-{{stats["index"]["latest_post"]}}</strong>.<br>
     Für Benisverkürzungen, die durch nicht erkannte Reposts entstanden sind, können wir nicht haften!
 </p>
 
@@ -47,17 +47,16 @@
 <h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
 <div class="result-list">
     {% for search_result in search_results %}
-    <a href="https://pr0gramm.com/new/{{search_result.post.id}}" style="background-image:url(https://img.pr0gramm.com/{{search_result.post.image}});" target="_blank"></a>
-    <!--<img src="https://img.pr0gramm.com/{{image}}" />-->
+    <a href="https://pr0gramm.com/new/{{search_result.post.id"> <img src="https://img.pr0gramm.com/{{search_result.post.image}}" class="thumbnail" height="100" width="100" /></a>
     {% endfor %}
 </div>
 {% endif %}
 
 <div id="box">
     <h2>Suche</h2>
-    <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
+    <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu suchen.</p>
     <p>
-        <strong>Keine webm oder gif!</strong>
+        <strong>Die Suche nach WEBMs und GIFs ist nicht möglich!</strong>
     </p>
     <form action="/" method="post" enctype="multipart/form-data">
         <!--<fieldset>-->

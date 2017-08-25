@@ -8,6 +8,9 @@
 	z-index:999;
 }
 
+/* DAS PR0GRAMM MAG CSS...
+	eigentlich garnicht so doll :/
+*/
 
 /* Amalgamation 2017-08-22 16:55:03 */
    @font-face{font-family:'pict0gramm';src:url('/media/fonts/pict0gramm.eot');src:url('/media/fonts/pict0gramm.eot?#iefix') format('embedded-opentype'), url('/media/fonts/pict0gramm.woff') format('woff'), url('/media/fonts/pict0gramm.ttf') format('truetype'), url('/media/fonts/pict0gramm.svg#pict0gramm') format('svg');font-weight:normal;font-weight:400;text-rendering:optimizeLegibility;-webkit-font-smoothing:subpixel-antialiased;}
@@ -426,4 +429,6 @@ a#secret-santa-badge{position:absolute;width:27px;height:30px;background-image:u
 a#secret-santa-badge:hover{background-position:0 30px;}
 a#pr0-miner{position:absolute;width:30px;height:30px;background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAMAAAAM7l6QAAAB2lBMVEX/rw//////sRT/sBD7tyL6uSr+w0j/sRP/sxj9tBv7uyv4tR/8vzX5tyf9shj/tiL/tyX3tSD+tR7/rw/7uCH+wUL+shT+wD3+tyP+vDH+vCz/tBz6uy3+vzX/shb/w0P+vjr/vTT/uCj/sxv/sxr+xU36uSr+shb/sBL/sBP/sRP/shf8sxv/shf+tRv/tRz9tx//tx75uCX/uh/9sBP/sBH3tSH9thX9sRX+sRH7uSP8txb+vS77tRX+wkP7tRT/xk3/tiH9sRH6tRX+uyn/sxj+sRH7sxT+uh39tRb+shP+sRH/tyX+sBH9sRL8sxP6tBX/////rw//xE7/4qf/xE//68P/z3D/03z/+/L/5bD/ymH/tB7/3Zj/25P/8NP/1H7/wkn/tSD//PX/ujH/vz//tiT/+Ov/8dX/1H3/9eD/3Zn/y2L/v0D/36D/x1f/2Yz/4qn/3pv/sRT/sRX/yFr/6Ln/tB3/sxv/ujD/2o//7MX/6Lv/79D/vDf/vTn/vDX/89v/xVD/+ez/7Mf/shf/uCn/03v/2Y3/yV3/tB//yl//3JX/357/8dT/+e7/sBL/vjv/zGX/tyj/8tn/9N3/4qj/9+f/yV7/vTr/7cn/46r/1YD/2It+osA/AAAAUXRSTlMAAPv6s2hn+vLdZG8ri+rs5DTp/nGP7oHetYzzOkH2Z7m/4PP1W2Px+vv79OL14eW6wV9r9PeFkezwMzxtd3F5ReboTJTu75dtuuHy5fPiu3F4QCJmAAABbUlEQVR4Xn3TU5MsQRCG4Zq1bds4tG18OZ61bfPYtv/r5snu6u6ZPbHvTUXFE5GRF1XKtWfKpXR1MYn1DfEJBYVxSmdzahpZpedGcEkLhZVR6uRYiiw7x+Ykgf5Voj9TpEvWnEJSIDjfhTf095PpmSZnGdwBbnwaAybnGZxPZs98kEL3DS8SLibdZ3xZ8XY/BPzCZf+4lqw6MEHcJGBsWM5cYXMIM3LOYk64krnK5gEsCi9hWfgWc7WlP/GLpN/oFq5hjrL4OdCz7u7s7wXWhKOYGy32YRRGYyQ1MTdrXQB4wMaTdx4vGbUyt2nuwyZt4SnZtTPv0/wCLwmPydF+5gNiD7bd7/HhI946+SCzOsT6CNx36sIPhx6W53CE2e35CnyjIDodfFRYHZPLYGBoGCMOPa4MPkFmr/yvHXzSZHWK/tNppVmd2a1nlc3q3PlwvHAx4htcumzjlatMmnXXrt+4GR19+87dewwW79kOiOrOa2IKGX8AAAAASUVORK5CYII=');top:12px;left:-40px;opacity:1;}
 a#pr0-miner:hover{opacity:1;}
+
+
 

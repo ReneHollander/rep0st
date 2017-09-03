@@ -8,7 +8,45 @@ Sourcecode von rep0st, der Bilder Suchmaschine für pr0gramm. Erreichbar unter [
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
 
 ## Entwickeln
-Viel zu kompliziert das selber zum Laufen zu bringen...
+Entweder Virtuelle Maschine verwenden oder unter Linux versuchen aufzusetzen.
+
+### Virtuelle Maschine
+Download: [rep0st.ova](https://files.rene8888.at/rep0st/rep0st.ova)
+
+#### Einstellungen (Virtual Box)
+##### Gemeinsame Ordner
+
+| Name | Pfad (Beispiel) | Verwendung |
+| ------------- | ------------- | ------------- |
+| pr0gramm  | E:\pr0gramm  | Speicherort der heruntergeladenen Bilder. |
+| rep0st  | C:\Users\Rene Hollander\repositories\rep0st | Pfad zum Workspace. |
+
+##### Netzwerk
+
+| Typ | IPv4 Adresse | IPv4 Netzmaske | DHCP |
+| ------------- | ------------- | ------------- | ------------- |
+| Host Only  | 192.168.10.100 | 255.255.255.0 | deaktiviert  |
+
+#### Verwedung
+##### Logins
+
+| Wofür | Name | Passwort |
+| ------------- | ------------- | ------------- | 
+| User  | root  | root |
+| User  | rene | rene |
+| MySQL | root | root |
+| MySQL | rep0st | rep0stpw |
+
+##### Starten
+1. VM Starten
+2. Mit PuTTY verbinden
+   - Adresse: 192.168.10.20
+   - User: rene
+   - Passwort: rene
+3. `cd rep0st/`: Hier wird der gemeinsame Ordner gemounted.
+4. `./run background_job`: Macht ein Update vom Index und provisioniert Redis (Kann durch große Anzahl an Bildern sehr lange dauern!). Nachdem der Index gebaut wurde kann mit CTRL+C beendet werden.
+5. `./run site`: Frontend starten. Nach jeder Änderung am Code einfach neu starten.
+6. Wenn fertig, Zustand der VM speichern, dann muss beim nächsten Start der Background Job nicht ausgeführt werden.
 
 ### Abhängigkeiten
 - MariaDB

@@ -3,8 +3,8 @@
     <title>
         rep0st
     </title>
-    <link rel="icon" href="{{ url_for('static', filename='images/rep0st-favicon.png') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylesheet.css') }}">
+    <link rel="icon" href="/static/images/rep0st-favicon.png">
+    <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
 </head>
 <body>
 
@@ -21,7 +21,7 @@
 <p>
     Die Suche ist natürlich nicht perfekt. Wenn kein ähnliches Bild gefunden
     wurde, heißt das nicht, dass heute kein rep0st deinen Keller verlassen wird.
-    Findest du unter den Ergebnissen jedoch deinen Upload und lädst das Bild trotzdem
+    Findest du unter den Ergebnissen jedoch dein Upload und lädst das Bild trotzdem
     hoch, so ist Minusbenis nicht mehr weit.
 </p>
 <p>
@@ -32,27 +32,27 @@
     die weiterführung seines Projekts! Relatierter Post: <a href="https://pr0gramm.com/top/613715">/top/613715</a>.
 </p>
 <p>
-    Durchsucht werden alle sfw, nsfw und nsfl Bilder von <strong>1-{{stats["index"]["latest_post"]}}</strong>.<br>
+    Durchsucht werden alle sfw, nsfw und nsfl Bilder von <strong>1-2116645</strong>.<br>
     Für Benisverkürzungen, die durch nicht erkannte Reposts entstanden sind, können wir nicht haften!
 </p>
 
-{% if error %}
-<div id="box_error">
-    <h3>Ein Fehler ist aufgetreten!</h3>
-    {{error}}
-</div>
-{% endif %}
+
+
 
 {% if search_results %}
 <h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
 <div class="result-list">
-    <ul class="enlarge">
     {% for search_result in search_results %}
-    <li><img src="https://thumb.pr0gramm.com/{{search_result.post.image}}" width="150px" height="100px"/><span><img src="https://img.pr0gramm.com/{{search_result.post.image}}"/><br /></span></li>
+	
+		<a class="lightbox" href="#{{search_result.post.image}}"> <img src="https://thumb.pr0gramm.com/{{search_result.post.image}}"/> </a> 
+		
+		<div class="lightbox-target" id="{{search_result.post.image}}">
+			<img src="https://img.pr0gramm.com/{{search_result.post.image}}"/> <a class="lightbox-close" href="#"></a>
+		</div>
     {% endfor %}
-    </ul>
 </div>
 {% endif %}
+
 
 <div id="box">
     <h2>Suche</h2>
@@ -80,6 +80,6 @@
 </div>
 
 <script language="javascript" type="text/javascript"
-        src="{{ url_for('static', filename='js/uploadenhance.js') }}"></script>
+        src="/static/js/uploadenhance.js"></script>
 </body>
 </html>

@@ -5,6 +5,7 @@
     </title>
     <link rel="icon" href="/static/images/rep0st-favicon.png">
     <link rel="stylesheet" type="text/css" href="/static/css/stylesheet.css">
+	
 </head>
 <body>
 
@@ -43,10 +44,9 @@
 <h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
 <div class="result-list">
     {% for search_result in search_results %}
-	
-		<a class="lightbox" href="#{{search_result.post.image}}"> <img src="https://thumb.pr0gramm.com/{{search_result.post.image}}"/> </a> 
-		
+		<a class="lightbox" href="#{{search_result.post.image}}"> <img src="https://thumb.pr0gramm.com/{{search_result.post.image}}"/> </a>
 		<div class="lightbox-target" id="{{search_result.post.image}}">
+			<h1><a href="https://pr0gramm.com/new/{{search_result.post.id}}">Zum Post auf dem pr0gramm</a></h1>
 			<img src="https://img.pr0gramm.com/{{search_result.post.image}}"/> <a class="lightbox-close" href="#"></a>
 		</div>
     {% endfor %}

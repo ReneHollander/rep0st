@@ -3,7 +3,7 @@ rep0st
 Sourcecode von rep0st, der Bilder Suchmaschine für pr0gramm. Erreichbar unter [rep0st.rene8888.at](https://rep0st.rene8888.at/)
 
 # Autoren
-- Rene Hollander <rhollander@google.com> ([user/Rene8888](http://pr0gramm.com/user/Rene8888))
+- Rene Hollander ([user/Rene8888](http://pr0gramm.com/user/Rene8888))
 - Patrick Malik
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
 

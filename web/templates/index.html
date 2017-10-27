@@ -1,0 +1,85 @@
+<html xmlns:width="http://www.w3.org/1999/xhtml">
+<head>
+    <title>
+        rep0st
+    </title>
+    <link rel="icon" href="{{ url_for('static', filename='images/rep0st-favicon.png') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylesheet.css') }}">
+	
+</head>
+<body>
+
+<h1>rep0st</h1>
+<h2 id="test"></h2>
+
+
+<p>
+    rep0st minimiert das Risiko von Benisverkürzungen durch Reposts. Mithilfe unserer Skalarwellentechnologie
+    wurden alle Bilder, die je auf dem pr0gramm gepostet wurden, auf dem im pr0gramm Hauptquartier befindlichen
+    SNASA Cluster aufbereitet und indiziert. Mithilfe von reichlich Magie wird dann dein Bild mit der Datenbank
+    verglichen. Angezeigt werden dann Bilder, die deinem Bild ähnlich sind! (Kann p0rn und g0re enthalten!)
+</p>
+<p>
+    Die Suche ist natürlich nicht perfekt. Wenn kein ähnliches Bild gefunden
+    wurde, heißt das nicht, dass heute kein rep0st deinen Keller verlassen wird.
+    Findest du unter den Ergebnissen jedoch dein Upload und lädst das Bild trotzdem
+    hoch, so ist Minusbenis nicht mehr weit.
+</p>
+<p>
+    Sourcecode: <a href="https://github.com/ReneHollander/rep0st">github.com/ReneHollander/rep0st</a><br>
+    Momentaner Maintainer: <a href="https://pr0gramm.com/user/Rene8888">/user/Rene8888</a>.
+    <br><br>
+    Die meiste Arbeit an dem Tool stammt von <a href="https://pr0gramm.com/user/mopsalarm">/user/mopsalarm</a>. Dies ist
+    die weiterführung seines Projekts! Relatierter Post: <a href="https://pr0gramm.com/top/613715">/top/613715</a>.
+</p>
+<p>
+    Durchsucht werden alle sfw, nsfw und nsfl Bilder von <strong>1-{{stats["index"]["latest_post"]}}</strong>.<br>
+    Für Benisverkürzungen, die durch nicht erkannte Reposts entstanden sind, können wir nicht haften!
+</p>
+
+
+
+
+{% if search_results %}
+<h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
+<div class="result-list">
+    {% for search_result in search_results %}
+		<a class="lightbox" href="#{{search_result.post.image}}"> <img src="https://thumb.pr0gramm.com/{{search_result.post.thumb}}"/> </a>
+		<div class="lightbox-target" id="{{search_result.post.image}}">
+			<h1><a href="https://pr0gramm.com/new/{{search_result.post.id}}">Zum Post auf dem pr0gramm</a></h1>
+			<img src="https://img.pr0gramm.com/{{search_result.post.image}}"/> <a class="lightbox-close" href="#"></a>
+		</div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+<div id="box">
+    <h2>Suche</h2>
+    <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf pr0gramm zu schauen.</p>
+    <p>
+        <strong>Keine webm oder gif!</strong>
+    </p>
+    <form action="/" method="post" enctype="multipart/form-data">
+        <!--<fieldset>-->
+        <input type="checkbox" id="sfw" name="filter" value="sfw" checked/><label for="sfw"> sfw</label>
+        <input type="checkbox" id="nsfw" name="filter" value="nsfw" checked/> <label for="nsfw"> nsfw</label>
+        <input type="checkbox" id="nsfl" name="filter" value="nsfl" checked/> <label for="nsfl"> nsfl</label>
+        <p/>
+        <!--</fieldset>-->
+
+        Bild: <input name="image" id="image" type="file" class="inputfile"/><label id="imageUpload" for="image">Wählen
+        Sie eine Datei
+        aus</label>
+        <p/>
+        oder<p/>
+        URL: <input name="url" autofocus="" type="text"/>
+        <p/>
+        <input value="rep0st?" type="submit"/>
+    </form>
+</div>
+
+<script language="javascript" type="text/javascript"
+        src="{{ url_for('static', filename='js/uploadenhance.js') }}"></script>
+</body>
+</html>

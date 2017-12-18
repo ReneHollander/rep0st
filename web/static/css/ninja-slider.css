@@ -1,0 +1,279 @@
+#ninja-slider {
+    width:100%;
+    background:#191919;
+    padding: 30px 0;
+
+    margin:0 auto;
+    overflow:hidden;
+    box-sizing:border-box;
+}
+
+#ninja-slider.fullscreen {
+    background:#000;
+}
+
+
+#ninja-slider .fs-icon {
+    top:6px;
+    right:6px;
+    width:60px;
+    height:26px;
+    background: rgba(0,0,0,0.2);
+    z-index:2;
+    color:white;
+    text-align:center;
+    font:bold 11px/26px arial;
+    border:1px solid rgba(255,255,255,0.3);
+    border-radius:2px;
+    opacity:0;
+    -webkit-transition:opacity 0.8s;
+    transition:opacity 0.8s;
+}
+
+#ninja-slider .slider-inner:hover .fs-icon,
+#ninja-slider.fullscreen .fs-icon {
+    opacity: 1;
+}
+#ninja-slider.fullscreen div.fs-icon {
+    right:30px;
+}
+
+#ninja-slider .fs-icon::before {      
+    content:"EXPAND";
+    display:block;
+}
+
+#ninja-slider.fullscreen .fs-icon::before {
+    content:"CLOSE";
+}
+
+
+#ninja-slider .slider-inner {
+    margin:0 auto;/*center-aligned */
+    font-size:0px;
+    position:relative;
+    box-sizing:border-box;
+}
+
+#ninja-slider.fullscreen .slider-inner {
+    width:95%;
+}
+
+#ninja-slider ul {
+    position:relative;
+    list-style:none;
+    padding:0;
+    box-sizing:border-box;
+}
+
+#ninja-slider li {
+    
+    width:100%;
+    height:100%;
+    top:0;
+    left:0;
+    position: absolute;
+    font-size:12px;
+    list-style:none;
+    margin:0;
+    padding:0;
+    opacity:0;
+    overflow:hidden;
+    box-sizing:border-box;
+}
+
+#ninja-slider li.ns-show {
+    opacity:1;
+}
+
+#ninja-slider .ns-img {
+    background-color:rgba(0,0,0,0.3);
+    background-size:contain;
+
+    box-shadow: inset 0 0 2px rgba(255,255,255,.3);
+    border-radius:6px;
+
+    cursor:default;
+    display:block;
+    position: absolute;
+    width:100%;
+    height:100%;
+    background-repeat:no-repeat;
+    background-position:center center;
+}
+
+
+/*---------- Captions -------------------*/
+#ninja-slider .caption {
+    padding:20px 40px;
+    margin:auto;
+    left:0;right:0;
+    top:auto;bottom:0px;
+    width:auto;
+    text-align:right;
+    font-family:sans-serif;
+    font-size:11px;
+    color:rgba(255,255,255,0.2);
+    background:none;
+    /*background:rgba(0,0,0,0.12);*/
+    position:absolute;
+    box-sizing:border-box;
+}
+#ninja-slider li .cap1 {
+    color:rgba(255,255,255,0.5);
+    font:bold 32px arial;
+    text-align:center;
+
+    opacity:0;
+    bottom:40%;
+    -webkit-transition:bottom 1.3s, opacity 1s;
+    transition:bottom 1.3s, opacity 1s;
+}
+
+/*The cap1 of the current slide */
+#ninja-slider li[class*='-'] .cap1 {
+    opacity:1;
+    bottom:20%;
+}
+#ninja-slider li .cap2 {
+    color:rgba(255, 162, 0, 0.5);
+    font-size:23px;
+    bottom:15%;
+    -webkit-transition-delay: 1s;
+    transition-delay: 1s;
+}
+
+/*The cap2 of the current slide */
+#ninja-slider li[class*='-s'] .cap2 {
+    bottom:10%;
+}
+
+
+/* ---------Arrow buttons ------- */   
+/* The arrow button id should be: slider id + ("-prev", "-next", and "-pause-play") */ 
+#ninja-slider-pause-play { display:none;}  
+
+#ninja-slider-prev, #ninja-slider-next
+{
+    position: absolute;
+    display:inline-block;
+    width:42px;
+    height:56px;
+    line-height:56px;
+    top: 50%;
+    margin-top:-51px;/*pager's height should also be counted*/
+    background-color:rgba(8,8,0,91);
+    background-color:#ccc\9;/*IE8 hack*/
+    backface-visibility:hidden;
+    color:white;
+    overflow:hidden;
+    white-space:nowrap;
+    -webkit-user-select: none;
+    user-select:none;
+    border-radius:2px;
+    z-index:10;
+    opacity:0.3; 
+    font-family:sans-serif;   
+    font-size:13px;
+    cursor:pointer;
+    -webkit-transition:all 0.7s;
+    transition:all 0.7s;
+}
+
+.slider-inner:hover #ninja-slider-prev, .slider-inner:hover #ninja-slider-next {
+    opacity:1;
+}
+
+
+#ninja-slider-prev {
+    left: -42px; 
+}
+#ninja-slider-next {
+    right: -42px;
+}
+
+#ninja-slider-prev::before, #ninja-slider-next::before {
+    position: absolute;
+    top: 17px;
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-left: 2px solid white;
+    border-top: 2px solid white;
+    backface-visibility:hidden;
+}
+
+#ninja-slider-prev::before {
+    -ms-transform:rotate(-45deg);
+    -webkit-transform:rotate(-45deg);
+    transform: rotate(-45deg);
+    right:4px;
+}
+
+#ninja-slider-next::before {
+    -ms-transform:rotate(135deg);
+    -webkit-transform:rotate(135deg);
+    transform: rotate(135deg);
+    left:4px;
+}
+
+
+#ninja-slider-prev div, #ninja-slider-next div {display:none;}
+
+
+
+#ninja-slider-pager
+{
+    padding-top:30px;
+    margin:0 auto; 
+    text-align:center;
+    display:table;
+    font-size:0;
+}
+         
+#ninja-slider-pager a 
+{
+    display:inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: #CCC;
+    font-size:0; 
+    margin:2px 6px;
+    cursor:pointer;
+    border-radius:10px;
+    box-shadow:inset 0 1px 3px #666666;
+}
+
+#ninja-slider-pager a:hover 
+{
+    opacity:0.6;
+}
+#ninja-slider-pager a.active 
+{
+    background-color:#1293dc;
+    box-shadow:inset 0 1px 3px -1px #28b4ea,0 1px 1px rgba(0,0,0,.5);
+}
+
+   
+
+#ninja-slider-pager, #ninja-slider-prev, #ninja-slider-next, #ninja-slider-pause-play
+{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+
+@media only screen and (max-width:600px){
+
+    #ninja-slider-prev, #ninja-slider-next, #ninja-slider-pager {
+        display:none;
+    }
+
+    
+    #ninja-slider li .cap1 {
+        font-size:20px;
+    }
+}
+

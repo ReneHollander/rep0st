@@ -91,8 +91,15 @@ def fileValid(ifile):
 
 
 def custom_render_template(error=None, search_results=None):
-    return render_template("index.html", error=error, search_results=search_results, stats=rep.get_statistics())
-
+	agent = request.headers.get("User-Agent")
+	phones = ["iphone", "android", "blackberry"]
+	browser = request.user_agent.browser
+	if (browser == 'msie'):
+		return render_template('unsupported.html')
+	if any(phone in agent.lower() for phone in phones):
+		return render_template("mobile.html", search_results=search_results)
+	return render_template("index.html", error=error, search_results=search_results, stats=rep.get_statistics())
+	
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0")

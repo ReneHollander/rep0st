@@ -72,3 +72,23 @@ html {
 	border: 1px solid;
 	border-color: #E5E5E5 #D3D3D3 #B9C1C6;
 }
+
+
+/* Swipe 2 required styles */
+.swipe {
+	overflow: hidden;
+	visibility: hidden;
+	position: relative;
+}
+
+.swipe-wrap {
+	overflow: hidden;
+	position: relative;
+}
+
+	.swipe-wrap > div {
+		float: left;
+		width: 100%;
+		position: relative;
+	}
+/* END required styles */

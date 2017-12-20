@@ -1,32 +1,18 @@
 <!DOCTYPE HTML>
 <html>
 <head>
-    <title>Swipe 2</title>
+    <title>rep0st</title>
     <meta http-equiv="X-UA-Compatible" content="IE=8">
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0' />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/swipe-mobile.css') }}">
-    <style>
-        /* Swipe 2 required styles */
-        .swipe {
-            overflow: hidden;
-            visibility: hidden;
-            position: relative;
-        }
-
-        .swipe-wrap {
-            overflow: hidden;
-            position: relative;
-        }
-
-        .swipe-wrap > div {
-            float: left;
-            width: 100%;
-            position: relative;
-        }
-        /* END required styles */
-    </style>
-    
-
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="{{ url_for('static', filename='js/swipe.js') }}"></script>
+    <script>
+        $(document).ready(function () {
+            var elem = document.getElementById('mySwipe');
+            window.mySwipe = Swipe(elem, {});
+        });
+    </script>
 </head>
 <body>
     {% if search_results %}
@@ -58,18 +44,5 @@
             <input value="rep0st?" type="submit" />
         </form>
     </div>
-
-
-
-
-
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-    <script src="{{ url_for('static', filename='js/swipe.js') }}"></script>
-    <script>
-        var elem = document.getElementById('mySwipe');
-        window.mySwipe = Swipe(elem, {
-        });
-    </script>
 </body>
-
 </html>

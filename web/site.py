@@ -9,6 +9,10 @@ from flask import request
 
 import config
 
+import sys
+sys.path.insert(0, '/home/rene/rep0st/web')
+import detect
+
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 rep = config.get_rep0st()
@@ -91,12 +95,11 @@ def fileValid(ifile):
 
 
 def custom_render_template(error=None, search_results=None):
-    agent = request.headers.get('User-Agent')
-    phones = ["iphone", "android", "blackberry"]
-    if any(phone in agent.lower() for phone in phones):
-        return render_template("mobile.html", error=error, search_results=search_results, stats=rep.get_statistics())
-    else:
-        return render_template("index.html", error=error, search_results=search_results, stats=rep.get_statistics())
+    template = "index.html"
+    if detect.MobileDetect(useragent=request.headers.get('User-Agent')).is_mobile():
+       template = "mobile.html"
+    
+    return render_template(template, error=error, search_results=search_results, stats=rep.get_statistics())
 
 
 if __name__ == "__main__":

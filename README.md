@@ -6,6 +6,7 @@ Sourcecode von rep0st, der Bilder Suchmaschine für pr0gramm. Erreichbar unter [
 - Rene Hollander ([user/Rene8888](http://pr0gramm.com/user/Rene8888))
 - Patrick Malik
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
+- sm00thelf
 
 - Ein spezielles Dankeschön geht an den Github User "[thebird](https://github.com/thebird/)"  mit dessen projekt "/swipe/" die Darstellung von Ergebnissen auf mobilen Endgeräten schön umgesetzt werden konnte.
 

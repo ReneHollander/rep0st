@@ -45,10 +45,20 @@
 <div class="result-list">
     {% for search_result in search_results %}
 		<a class="lightbox" href="#{{search_result.post.image}}"> <img src="https://thumb.pr0gramm.com/{{search_result.post.thumb}}"/> </a>
-		<div class="lightbox-target" id="{{search_result.post.image}}">
-			<h1><a href="https://pr0gramm.com/new/{{search_result.post.id}}">Zum Post auf dem pr0gramm</a></h1>
-			<img src="https://img.pr0gramm.com/{{search_result.post.image}}"/> <a class="lightbox-close" href="#"></a>
-		</div>
+        <div class="lightbox-target" id="{{search_result.post.image}}">
+            <img src="https://img.pr0gramm.com/{{search_result.post.image}}" />
+            <a href="#"><button>Zurück zu den Ergebnissen</button></a>
+            <a target="_blank" href="https://pr0gramm.com/new/{{search_result.post.id}}"><button>Zum Post auf pr0gramm</button></a>
+            <details open>
+                <summary>Details zum Bild</summary>
+                <p>ID: {{search_result.post.id}}</p>
+                <p>Datum/Uhrzeit: {{search_result.post.created}}</p>
+                <p>Breite (px): {{search_result.post.width}}</p>
+                <p>Höhe (px): {{search_result.post.height}}</p>
+                <p>Ton: {{search_result.post.audio}}</p>
+                <p>SFW [1], NSFW [2], NSFL [4]: {{search_result.post.flags}}</p>
+            </details>
+        </div>
     {% endfor %}
 </div>
 {% endif %}

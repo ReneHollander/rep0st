@@ -10,8 +10,8 @@ from flask import request
 import config
 
 import sys
-sys.path.insert(0, '/home/rene/rep0st/web')
-import detect
+
+from mobiledetect import detect
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 

@@ -15,19 +15,10 @@
     </script>
 </head>
 <body>
-    {% if search_results %}
-    <div id='mySwipe' style='margin:0 auto' class='swipe'>
-        <div class='swipe-wrap'>
-            {% for search_result in search_results %}
-            <div><img src="https://img.pr0gramm.com/{{search_result.post.image}}" width=100% /></div>
-            {% endfor %}
-        </div>
-    </div>
-    {% endif %}
-
+    <h3>Um zu dem Post auf dem pr0gramm zu gelangen, musst du nur auf das Bild tippen.</h3>
     <div id="box">
         <h2>Suche</h2>
-        <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern (<strong>1-{{stats["index"]["latest_post"]}}</strong>) auf dem pr0gramm zu schauen.</p>
+        <p>Wähle ein Bild aus und lade es hoch um nach ähnlichen Bildern auf dem pr0gramm zu schauen.</p>
         <p>
             <strong>Keine webm oder gif!</strong>
         </p>
@@ -44,5 +35,19 @@
             <input value="rep0st?" type="submit" />
         </form>
     </div>
+
+    {% if search_results %}
+    <h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
+    <div id='mySwipe' style='margin:0 auto' class='swipe'>
+        <div class='swipe-wrap'>
+            {% for search_result in search_results %}
+            <!-- <div><img src="https://img.pr0gramm.com/{{search_result.post.image}}" width=100% /></div> -->
+            <div> <a href="https://pr0gramm.com/new/{{search_result.post.id}}"> <img src="https://img.pr0gramm.com/{{search_result.post.image}}" width=100% /> </a></div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+
 </body>
 </html>

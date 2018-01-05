@@ -35,6 +35,7 @@ image_config = {
     'path': '/media/pr0gramm/images',
 }
 
+
 backgroundjob_config = {
     'rebuild_index_time': '03:00',
     'update_index_every_seconds': 60,

@@ -6,6 +6,9 @@ Sourcecode von rep0st, der Bilder Suchmaschine für pr0gramm. Erreichbar unter [
 - Rene Hollander ([user/Rene8888](http://pr0gramm.com/user/Rene8888))
 - Patrick Malik
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
+- sm00thelf
+
+- Ein spezielles Dankeschön geht an den Github User "[thebird](https://github.com/thebird/)"  mit dessen projekt "/swipe/" die Darstellung von Ergebnissen auf mobilen Endgeräten schön umgesetzt werden konnte.
 
 ## Entwickeln
 Entweder Virtuelle Maschine verwenden oder unter Linux versuchen aufzusetzen.
@@ -53,7 +56,7 @@ Download: [rep0st.ova](https://files.rene8888.at/rep0st/rep0st.ova)
 - Redis
 - Python 3.6
 ```
-pip install -U annoy cymysql Flask Logbook msgpack-numpy msgpack-python PyWavelets redis requests schedule SQLAlchemy opencv-python numpy scipy
+pip install -U annoy cymysql Flask Logbook msgpack-numpy msgpack-python PyWavelets redis requests schedule SQLAlchemy opencv-python numpy scipy pymobiledetect
 ```
 
 ## Lizenz

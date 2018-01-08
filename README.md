@@ -5,6 +5,7 @@ Sourcecode von rep0st, der Bilder Suchmaschine für pr0gramm. Erreichbar unter [
 # Autoren
 - Rene Hollander ([user/Rene8888](http://pr0gramm.com/user/Rene8888))
 - Patrick Malik
+- Florian Maak
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
 - sm00thelf
 

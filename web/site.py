@@ -58,6 +58,45 @@ def search():
             else:
                 error = "Ungueltiges Bild"
 
+    if "nsfl" not in request.form.getlist("filter"):
+            while True:
+                nsfl_c = 0
+                for u in search_results:
+                    if u.post.flags == 4:
+                        nsfl_c = nsfl_c + 1
+                if nsfl_c == 0:
+                    break
+                else:
+                    for u in search_results:
+                        if u.post.flags == 4:
+                            search_results.remove(u)
+
+    if "nsfw" not in request.form.getlist("filter"):
+        while True:
+            nsfw_c = 0
+            for u in search_results:
+                if u.post.flags == 2:
+                    nsfw_c = nsfw_c + 1
+            if nsfw_c == 0:
+                break
+            else:
+                for u in search_results:
+                    if u.post.flags == 2:
+                        search_results.remove(u)
+
+    if "sfw" not in request.form.getlist("filter"):
+        while True:
+            sfw_c = 0
+            for u in search_results:
+                if u.post.flags == 1:
+                    sfw_c = sfw_c + 1
+            if sfw_c == 0:
+                break
+            else:
+                for u in search_results:
+                    if u.post.flags == 1:
+                        search_results.remove(u)
+
     return custom_render_template(error=error, search_results=search_results)
 
 

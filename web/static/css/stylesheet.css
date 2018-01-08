@@ -21,10 +21,9 @@ input[type="submit"] {
     text-align: center;
     padding: 8px 8px 6px 8px;
     margin: 0;
-    color: #F5F7F6;
+    color: #f5f7f6;
     cursor: pointer;
     background-color: #ee4d2e;
-    background-color: var(--theme-main-color);
     font-size: 12px;
     outline: none;
     background-color: #ee4d2e;
@@ -35,24 +34,15 @@ input, textarea {
     font-size: 14px;
     margin: 0;
     border: 0;
-    background-color: #1B1E1F;
+    background-color: #1b1e1f;
     color: #bbb;
     outline: none;
     padding: 5px;
-    appearance: none;
-    -webkit-appearance: none;
-}
-
-* {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
 }
 
 .inputfile {
     width: 0.1px;
     height: 0.1px;
-    opacity: 0;
     overflow: hidden;
     position: absolute;
     z-index: -1;
@@ -64,22 +54,18 @@ input, textarea {
     font-size: 14px;
     margin: 0;
     border: 0;
-    background-color: #1B1E1F;
+    background-color: #1b1e1f;
     color: #bbb;
     outline: none;
     padding: 5px;
-    appearance: none;
-    -webkit-appearance: none;
 }
 
 .result-list a {
     display: inline-block;
-    background-size: contain;
     overflow: hidden;
 }
 
-body,
-html {
+body, html {
     padding: 0;
     margin-left: 10%;
     margin-right: 10%;
@@ -99,13 +85,7 @@ a.lightbox img {
     position: fixed;
     top: -100%;
     width: 100%;
-    background: rgba(0, 0, 0, .7);
-    width: 100%;
-    opacity: 0;
-    -webkit-transition: opacity .5s ease-in-out;
-    -moz-transition: opacity .5s ease-in-out;
-    -o-transition: opacity .5s ease-in-out;
-    transition: opacity .5s ease-in-out;
+    background: #00070F;
     overflow: hidden;
 }
 
@@ -119,63 +99,9 @@ a.lightbox img {
     max-height: 0%;
     max-width: 0%;
     border: 3px solid white;
-    box-shadow: 0px 0px 8px rgba(0, 0, 0, .3);
-    box-sizing: border-box;
-    -webkit-transition: .5s ease-in-out;
-    -moz-transition: .5s ease-in-out;
-    -o-transition: .5s ease-in-out;
-    transition: .5s ease-in-out;
-}
-
-a.lightbox-close {
-    display: block;
-    width: 50px;
-    height: 50px;
-    box-sizing: border-box;
-    background: white;
-    color: black;
-    text-decoration: none;
-    position: absolute;
-    top: -80px;
-    right: 0;
-    -webkit-transition: .5s ease-in-out;
-    -moz-transition: .5s ease-in-out;
-    -o-transition: .5s ease-in-out;
-    transition: .5s ease-in-out;
-}
-
-a.lightbox-close:before {
-    content: "";
-    display: block;
-    height: 30px;
-    width: 1px;
-    background: black;
-    position: absolute;
-    left: 26px;
-    top: 10px;
-    -webkit-transform: rotate(45deg);
-    -moz-transform: rotate(45deg);
-    -o-transform: rotate(45deg);
-    transform: rotate(45deg);
-}
-
-a.lightbox-close:after {
-    content: "";
-    display: block;
-    height: 30px;
-    width: 1px;
-    background: black;
-    position: absolute;
-    left: 26px;
-    top: 10px;
-    -webkit-transform: rotate(-45deg);
-    -moz-transform: rotate(-45deg);
-    -o-transform: rotate(-45deg);
-    transform: rotate(-45deg);
 }
 
 .lightbox-target:target {
-    opacity: 1;
     top: 0;
     bottom: 0;
 }
@@ -186,5 +112,5 @@ a.lightbox-close:after {
 }
 
 .lightbox-target:target a.lightbox-close {
-    top: 0px;
+    top: 0;
 }

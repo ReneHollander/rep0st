@@ -55,6 +55,49 @@ def search():
                 curr_image = cv2.imdecode(curr_image, cv2.IMREAD_COLOR)
                 search_results = rep.get_index().search(curr_image)
 
+                nsfl = "nsfl" in request.form.getlist("filter")
+                nsfw = "nsfw" in request.form.getlist("filter")
+                sfw = "sfw" in request.form.getlist("filter")
+                
+                if not nsfl:
+                    while True:
+                        nsfl_c = 0
+                        for u in search_results:
+                            if u.post.is_nsfl():
+                                nsfl_c = nsfl_c + 1
+                        if nsfl_c == 0:
+                            break
+                        else:
+                            for u in search_results:
+                                if u.post.is_nsfl():
+                                    search_results.remove(u)
+
+                if not nsfw:
+                    while True:
+                        nsfw_c = 0
+                        for u in search_results:
+                            if u.post.is_nsfw():
+                                nsfw_c = nsfw_c + 1
+                        if nsfw_c == 0:
+                            break
+                        else:
+                            for u in search_results:
+                                if u.post.is_nsfw():
+                                    search_results.remove(u)
+
+                if not sfw:
+                    while True:
+                        sfw_c = 0
+                        for u in search_results:
+                            if u.post.is_sfw():
+                                sfw_c = sfw_c + 1
+                        if sfw_c == 0:
+                            break
+                        else:
+                            for u in search_results:
+                                if u.post.is_sfw():
+                                    search_results.remove(u)
+
             else:
                 error = "Ungueltiges Bild"
 

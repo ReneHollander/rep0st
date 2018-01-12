@@ -1,13 +1,14 @@
+import simplejson as json
 import os
+import traceback
 
 import cv2
 import numpy
 import requests
-from flask import Flask
-from flask import render_template
-from flask import request
+from flask import Flask, request, render_template, Response
 
 import config
+from rep0st.util import AutoJSONEncoder
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -24,70 +25,78 @@ def starting_page():
 @app.route("/", methods=["POST"])
 def search():
     url = request.form.get("url")
-    image = request.files.get("image")
 
     search_results = None
     error = None
     curr_image = None
 
-    if url != "" and image.filename != "":
+    if url != "" and 'image' in request.files and request.files['image'].filename != '':
         error = "Man kann nicht ein Bild und eine URL angeben!"
     else:
         try:
             if url != "":
-                if check_url(url):
-                    curr_image = get_image_from_url(url)
-                else:
+                curr_image = get_image_from_url(url)
+                if curr_image is None:
                     error = "Ungueltige URL!"
-            elif fileValid(image):
-                curr_image = numpy.fromstring(image.read(), numpy.uint8)
+            elif 'image' in request.files and request.files['image'].filename != '':
+                curr_image = numpy.fromstring(request.files['image'].read(), numpy.uint8)
             else:
                 error = "Keine URL oder Bild angegeben!"
         except Exception as ex:
             error = "Ein unbekannter Fehler " + str(ex)
 
         if error is None and curr_image is not None:
-            if check_image(curr_image):
-                curr_image = cv2.imdecode(curr_image, cv2.IMREAD_COLOR)
-                search_results = rep.get_index().search(curr_image)
-
-            else:
+            search_results = analyze_image(curr_image)
+            if search_results is None:
                 error = "Ungueltiges Bild"
 
     return custom_render_template(error=error, search_results=search_results)
 
 
-def check_url(url):
-    try:
-        requests.get(url)
-    except:
-        return False
-    return True
+@app.route("/api/search", methods=["POST"])
+def api_search_upload():
+    if 'image' not in request.files:
+        return api_response(error="invalid or no image", status=400)
+
+    image_file = request.files['image']
+    if image_file.filename == '':
+        return api_response(error="invalid or no image", status=400)
+
+    image = numpy.fromstring(image_file.read(), numpy.uint8)
+
+    results = analyze_image(image)
+    if results:
+        return api_response(resp=results, status=200)
+    else:
+        return api_response(error="invalid or no image", status=400)
+
+
+def api_response(resp=None, error=None, status=200):
+    if error is not None:
+        resp = {'error': error}
+    return Response(json.dumps(resp, default=AutoJSONEncoder), status=status,
+                    mimetype='application/json')
 
 
 def get_image_from_url(url):
-    resp = requests.get(url)
-    resp.raise_for_status()
-    content = resp.content
-    return numpy.asarray(bytearray(content), dtype=numpy.uint8)
+    try:
+        resp = requests.get(url)
+        resp.raise_for_status()
+        content = resp.content
+        return numpy.asarray(bytearray(content), dtype=numpy.uint8)
+    except:
+        return None
 
 
-def check_image(imagedata):
+def analyze_image(imagedata):
     try:
         image = cv2.imdecode(imagedata, cv2.IMREAD_COLOR)
-        if (type(image) != numpy.ndarray):
-            return False
-        return True
-    except Exception as ex:
-        return False
-
-
-def fileValid(ifile):
-    ifile.seek(0, os.SEEK_END)
-    if ifile == '' or ifile.tell() == 0:
-        return False
-    ifile.seek(0)
-    return True
+        if type(image) == numpy.ndarray:
+            return rep.get_index().search(image)
+        else:
+            return None
+    except:
+        return None
 
 
 def custom_render_template(error=None, search_results=None):

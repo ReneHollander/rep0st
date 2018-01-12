@@ -61,6 +61,18 @@ class Post(Base):
     status = Column(Enum(PostStatus), nullable=False, index=True, default=PostStatus.NOT_INDEXED)
     __table_args__ = (Index('post_status_type_index', "status", "type"),)
 
+    def __json__(self):
+        return {
+            'id': self.id,
+            'user': self.user,
+            'created': self.created.isoformat(),
+            'is_sfw': self.is_sfw(),
+            'is_nsfw': self.is_nsfw(),
+            'is_nsfl': self.is_nsfl(),
+            'image': self.image,
+            'thumb': self.thumb,
+        }
+
     def is_sfw(self):
         return self.flags & 1 != 0
 

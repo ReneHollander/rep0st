@@ -2,6 +2,7 @@ import sys
 from collections import namedtuple
 from concurrent.futures import wait, FIRST_COMPLETED
 from itertools import islice
+from json import JSONEncoder
 
 import numpy
 
@@ -89,3 +90,9 @@ def batch(n, i):
 
 def dist(x, y):
     return numpy.sqrt(numpy.max(numpy.sum((x - y) ** 2), 0))
+
+
+def AutoJSONEncoder(obj):
+    if hasattr(obj, '__json__'):
+        return obj.__json__()
+    raise TypeError(repr(obj) + " is not JSON serializable")

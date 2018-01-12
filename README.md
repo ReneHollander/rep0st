@@ -8,7 +8,7 @@ Sourcecode von rep0st, der Bilder Suchmaschine für [pr0gramm](https://pr0gramm.
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
 
 ## Documentation
-* [API](api): Documentation of the rep0st API.
+* [API](docs/api): Documentation of the rep0st API.
 
 ## Entwickeln
 Entweder Virtuelle Maschine verwenden oder unter Linux versuchen aufzusetzen.

@@ -1,11 +1,14 @@
 rep0st
 ======
-Sourcecode von rep0st, der Bilder Suchmaschine für pr0gramm. Erreichbar unter [rep0st.rene8888.at](https://rep0st.rene8888.at/)
+Sourcecode von rep0st, der Bilder Suchmaschine für [pr0gramm](https://pr0gramm.com). Erreichbar unter [rep0st.rene8888.at](https://rep0st.rene8888.at/)
 
 # Autoren
 - Rene Hollander ([user/Rene8888](http://pr0gramm.com/user/Rene8888))
 - Patrick Malik
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
+
+## Documentation
+* [API](api): Documentation of the rep0st API.
 
 ## Entwickeln
 Entweder Virtuelle Maschine verwenden oder unter Linux versuchen aufzusetzen.
@@ -53,7 +56,7 @@ Download: [rep0st.ova](https://files.rene8888.at/rep0st/rep0st.ova)
 - Redis
 - Python 3.6
 ```
-pip install -U annoy cymysql Flask Logbook msgpack-numpy msgpack-python PyWavelets redis requests schedule SQLAlchemy opencv-python numpy scipy
+pip install -U annoy cymysql Flask Logbook msgpack-numpy msgpack-python PyWavelets redis requests schedule SQLAlchemy opencv-python numpy simplejson
 ```
 
 ## Lizenz

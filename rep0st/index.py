@@ -67,9 +67,9 @@ class Rep0stIndex:
         for element in self.rep0st.redis.lrange('rep0st-latest-feature-vectors-index-' + str(self.current_index), 0,
                                                 -1):
             element = msgpack.unpackb(element)
-            data = np.asarray(bytearray(element['data'])).astype(np.float32)
+            data = np.asarray(bytearray(element[b'data'])).astype(np.float32)
             distance = dist(arr, data)
-            nearest.add(distance, element['id'])
+            nearest.add(distance, element[b'id'])
 
         list = []
         for item in nearest:

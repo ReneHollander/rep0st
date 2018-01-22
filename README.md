@@ -46,6 +46,7 @@ Download: [rep0st.ova](https://files.rene8888.at/rep0st/rep0st.ova)
    - Adresse: 192.168.10.20
    - User: rene
    - Passwort: rene
+2.1 Einmalig den folgenden Befehl ausführen: mkdir /media/pr0gramm/images
 3. `cd rep0st/`: Hier wird der gemeinsame Ordner gemounted.
 4. `./run background_job`: Macht ein Update vom Index und provisioniert Redis (Kann durch große Anzahl an Bildern sehr lange dauern!). Nachdem der Index gebaut wurde kann mit CTRL+C beendet werden.
 5. `./run site`: Frontend starten. Nach jeder Änderung am Code einfach neu starten.

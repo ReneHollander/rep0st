@@ -46,11 +46,11 @@ Download: [rep0st.ova](https://files.rene8888.at/rep0st/rep0st.ova)
    - Adresse: 192.168.10.20
    - User: rene
    - Passwort: rene
-2.1 Einmalig den folgenden Befehl ausführen: mkdir /media/pr0gramm/images
-3. `cd rep0st/`: Hier wird der gemeinsame Ordner gemounted.
-4. `./run background_job`: Macht ein Update vom Index und provisioniert Redis (Kann durch große Anzahl an Bildern sehr lange dauern!). Nachdem der Index gebaut wurde kann mit CTRL+C beendet werden.
-5. `./run site`: Frontend starten. Nach jeder Änderung am Code einfach neu starten.
-6. Wenn fertig, Zustand der VM speichern, dann muss beim nächsten Start der Background Job nicht ausgeführt werden.
+3. Einmalig den folgenden Befehl ausführen: mkdir /media/pr0gramm/images
+4. `cd rep0st/`: Hier wird der gemeinsame Ordner gemounted.
+5. `./run background_job`: Macht ein Update vom Index und provisioniert Redis (Kann durch große Anzahl an Bildern sehr lange dauern!). Nachdem der Index gebaut wurde kann mit CTRL+C beendet werden.
+6. `./run site`: Frontend starten. Nach jeder Änderung am Code einfach neu starten.
+7. Wenn fertig, Zustand der VM speichern, dann muss beim nächsten Start der Background Job nicht ausgeführt werden.
 
 ### Abhängigkeiten
 - MariaDB

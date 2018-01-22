@@ -57,7 +57,7 @@ Download: [rep0st.ova](https://files.rene8888.at/rep0st/rep0st.ova)
 - Redis
 - Python 3.6
 ```
-pip install -U annoy cymysql Flask Logbook msgpack-numpy msgpack-python PyWavelets redis requests schedule SQLAlchemy opencv-python numpy scipy pymobiledetect
+pip install -U annoy cymysql Flask Logbook msgpack-numpy msgpack-python PyWavelets redis requests schedule SQLAlchemy opencv-python numpy scipy pymobiledetect simplejson
 ```
 
 ## Lizenz

@@ -12,7 +12,7 @@ def iterate_posts(start=0):
     at_start = False
 
     while not at_start:
-        url = "http://pr0gramm.com/api/items/get?flags=15&newer=%d" % start
+        url = "https://pr0gramm.com/api/items/get?flags=15&newer=%d" % start
 
         log.debug("requesting api page {}", url)
         response = requests.get(url)
@@ -42,7 +42,7 @@ def iterate_posts(start=0):
 
 def iterate_tags(start=0):
     while True:
-        url = "http://pr0gramm.com/api/tags/latest?id=%d" % start
+        url = "https://pr0gramm.com/api/tags/latest?id=%d" % start
 
         log.debug("requesting api page {}", url)
         response = requests.get(url)
@@ -66,6 +66,6 @@ def iterate_tags(start=0):
 
 def download_image(post):
     log.debug("downloading image \"{}\" from post {}", post.image, post)
-    response = requests.get("http://img.pr0gramm.com/" + post.image)
+    response = requests.get("https://img.pr0gramm.com/" + post.image)
     response.raise_for_status()
     return response.content

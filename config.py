@@ -7,9 +7,18 @@ import redis
 from logbook.compat import RedirectLoggingHandler
 from sqlalchemy import create_engine
 
-from rep0st.rep0st import rep0st
+import rep0st
 
 IS_PRODUCTION = False
+
+pr0gramm_config = {
+    'baseurl': {
+        'api': 'https://pr0gramm.com/api',
+        'img': 'https://img.pr0gramm.com',
+    },
+    'username': 'USERNAME',
+    'password': 'PASSWORD',
+}
 
 mysql_config = {
     'user': 'rep0st',

@@ -1,24 +1,67 @@
+import time
 from datetime import datetime
 
-import requests
+from requests import Session
 from logbook import Logger
 
+import config
 from rep0st.database import Post, PostType, Tag
 
 log = Logger('pr0gramm API')
+
+s = Session()
+
+pr0gramm_logindata = {
+    'name': config.pr0gramm_config['username'],
+    'password': config.pr0gramm_config['password'],
+}
+baseurl_api = config.pr0gramm_config['baseurl']['api']
+baseurl_img = config.pr0gramm_config['baseurl']['img']
+
+
+def perform_login():
+    while True:
+        log.info("performing pr0gramm login")
+        response = s.post(baseurl_api + "/user/login", data=pr0gramm_logindata)
+        if response.status_code != 200:
+            log.error("error logging in. retrying in 10 seconds. status {}: {}", response.status_code, response.text)
+            time.sleep(10)
+            continue
+        if not response.json()['success']:
+            log.error("error logging in. wrong username/password.")
+            raise Exception("error logging in. wrong username/password.")
+        if response.json()['ban']:
+            log.error("error logging in. account is banned.")
+            raise Exception("error logging in. account is banned.")
+        return
+
+
+def perform_request(url):
+    error_count = 0
+    while True:
+        response = s.get(url)
+        if response.status_code == 403:
+            perform_login()
+            continue
+        elif response.status_code != 200:
+            log.warn("request finished with status {}: {}. retrying in 3 seconds", response.status_code, response.text)
+            error_count = error_count + 1
+            if error_count > 3:
+                log.warn("request to url {} failed too often, bailing", url)
+                raise Exception("request to url " + url + " failed too often")
+            time.sleep(3)
+            continue
+
+        return response
 
 
 def iterate_posts(start=0):
     at_start = False
 
     while not at_start:
-        url = "https://pr0gramm.com/api/items/get?flags=15&newer=%d" % start
-
+        url = baseurl_api + "/items/get?flags=15&newer=%d" % start
         log.debug("requesting api page {}", url)
-        response = requests.get(url)
-        response.raise_for_status()
-
-        data = response.json()
+        data = perform_request(url).json()
         at_start = data["atStart"]
 
         # create posts
@@ -42,13 +85,10 @@ def iterate_posts(start=0):
 
 def iterate_tags(start=0):
     while True:
-        url = "https://pr0gramm.com/api/tags/latest?id=%d" % start
-
+        url = baseurl_api + "/tags/latest?id=%d" % start
         log.debug("requesting api page {}", url)
-        response = requests.get(url)
-        response.raise_for_status()
+        data = perform_request(url).json()
 
-        data = response.json()
         if len(data['tags']) == 0:
             break
 
@@ -66,6 +106,4 @@ def iterate_tags(start=0):
 
 def download_image(post):
     log.debug("downloading image \"{}\" from post {}", post.image, post)
-    response = requests.get("https://img.pr0gramm.com/" + post.image)
-    response.raise_for_status()
-    return response.content
+    return perform_request(baseurl_img + post.image).content

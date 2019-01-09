@@ -42,8 +42,9 @@ def search():
                 curr_image = numpy.fromstring(request.files['image'].read(), numpy.uint8)
             else:
                 error = "Keine URL oder Bild angegeben!"
-        except Exception as ex:
-            error = "Ein unbekannter Fehler " + str(ex)
+        except:
+            traceback.print_exc()
+            error = "Unbekannter Fehler"
 
         if error is None and curr_image is not None:
             search_results = analyze_image(curr_image)
@@ -85,6 +86,7 @@ def get_image_from_url(url):
         content = resp.content
         return numpy.asarray(bytearray(content), dtype=numpy.uint8)
     except:
+        traceback.print_exc()
         return None
 
 
@@ -96,6 +98,7 @@ def analyze_image(imagedata):
         else:
             return None
     except:
+        traceback.print_exc()
         return None
 
 

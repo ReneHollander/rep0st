@@ -106,4 +106,4 @@ def iterate_tags(start=0):
 
 def download_image(post):
     log.debug("downloading image \"{}\" from post {}", post.image, post)
-    return perform_request(baseurl_img + post.image).content
+    return perform_request(baseurl_img + "/" + post.image).content

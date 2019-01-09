@@ -1,10 +1,10 @@
-<html xmlns:width="http://www.w3.org/1999/xhtml">
+<html>
 <head>
     <title>
         rep0st
     </title>
-    <link rel="icon" href="{{ url_for('static', filename='images/rep0st-favicon.png') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stylesheet.css') }}">
+    <link href="{{ url_for('static', filename='images/rep0st-favicon.png') }}" rel="icon">
+    <link href="{{ url_for('static', filename='css/stylesheet.css') }}" rel="stylesheet" type="text/css">
 </head>
 <body>
 
@@ -47,7 +47,8 @@
 <h3>Diese Bilder sind dem hochgeladenen ähnlich:</h3>
 <div class="result-list">
     {% for search_result in search_results %}
-    <a href="https://pr0gramm.com/new/{{search_result.post.id}}" style="background-image:url(https://img.pr0gramm.com/{{search_result.post.image}});" target="_blank"></a>
+    <a href="https://pr0gramm.com/new/{{search_result.post.id}}"
+       style="background-image:url(https://img.pr0gramm.com/{{search_result.post.image}});" target="_blank"></a>
     <!--<img src="https://img.pr0gramm.com/{{image}}" />-->
     {% endfor %}
 </div>
@@ -59,26 +60,26 @@
     <p>
         <strong>Keine webm oder gif!</strong>
     </p>
-    <form action="/" method="post" enctype="multipart/form-data">
+    <form action="/" enctype="multipart/form-data" method="post">
         <!--<fieldset>-->
-        <input type="checkbox" id="sfw" name="filter" value="sfw" checked/><label for="sfw"> sfw</label>
-        <input type="checkbox" id="nsfw" name="filter" value="nsfw" checked/> <label for="nsfw"> nsfw</label>
-        <input type="checkbox" id="nsfl" name="filter" value="nsfl" checked/> <label for="nsfl"> nsfl</label>
+        <input checked id="sfw" name="filter" type="checkbox" value="sfw"/><label for="sfw"> sfw</label>
+        <input checked id="nsfw" name="filter" type="checkbox" value="nsfw"/> <label for="nsfw"> nsfw</label>
+        <input checked id="nsfl" name="filter" type="checkbox" value="nsfl"/> <label for="nsfl"> nsfl</label>
         <p/>
         <!--</fieldset>-->
 
-        Bild: <input name="image" id="image" type="file" class="inputfile"/><label id="imageUpload" for="image">Wählen
+        Bild: <input class="inputfile" id="image" name="image" type="file"/><label for="image" id="imageUpload">Wählen
         Sie eine Datei
         aus</label>
         <p/>
         oder<p/>
-        URL: <input name="url" autofocus="" type="text"/>
+        URL: <input autofocus="" name="url" type="text"/>
         <p/>
-        <input value="rep0st?" type="submit"/>
+        <input type="submit" value="rep0st?"/>
     </form>
 </div>
 
-<script language="javascript" type="text/javascript"
-        src="{{ url_for('static', filename='js/uploadenhance.js') }}"></script>
+<script language="javascript" src="{{ url_for('static', filename='js/uploadenhance.js') }}"
+        type="text/javascript"></script>
 </body>
 </html>

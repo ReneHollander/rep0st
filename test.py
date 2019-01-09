@@ -1,8 +1,11 @@
 import cv2
 
 import config
+from rep0st import get_rep0st
 
-rep = config.get_rep0st()
+config.load()
+
+rep = get_rep0st()
 
 image = cv2.imread(str('test.jpg'), cv2.IMREAD_COLOR)
 

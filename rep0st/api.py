@@ -1,14 +1,14 @@
 import time
 from datetime import datetime
 
-from requests import Session
 from logbook import Logger
+from requests import Session
 
 import config
 from rep0st.database import Post, PostType, Tag
 
+config.load()
 log = Logger('pr0gramm API')
-
 s = Session()
 
 pr0gramm_logindata = {

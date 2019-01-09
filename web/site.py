@@ -1,18 +1,19 @@
-import simplejson as json
-import os
 import traceback
 
 import cv2
 import numpy
 import requests
+import simplejson as json
 from flask import Flask, request, render_template, Response
 
 import config
+from rep0st.rep0st import get_rep0st
 from rep0st.util import AutoJSONEncoder
 
+config.load()
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
-rep = config.get_rep0st()
+rep = get_rep0st()
 if config.IS_PRODUCTION:
     rep.get_index()
 

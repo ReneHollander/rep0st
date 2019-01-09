@@ -11,8 +11,8 @@ from rep0st.analyze import analyze_image
 from rep0st.database import FeatureType
 from rep0st.util import SimplePriorityQueue, dist
 
+config.load()
 log = Logger('index')
-
 SearchResult = namedtuple('SearchResult', 'post, similarity')
 
 

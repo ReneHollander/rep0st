@@ -1,21 +1,39 @@
 import datetime
 from concurrent.futures import ThreadPoolExecutor
-from cv2 import imread, imdecode
 from pathlib import Path
 from time import time
 
 import cv2
 import numpy as np
+import redis
+from cv2 import imread, imdecode
 from logbook import Logger
 from requests import HTTPError
+from sqlalchemy import create_engine
 
-from rep0st import util, analyze
+import config
+from rep0st.analyze import analyze_image
 from rep0st.api import iterate_posts, download_image
 from rep0st.database import Database, PostStatus, Feature
 from rep0st.index import Rep0stIndex
-from rep0st.util import batched_pool_runner
+from rep0st.util import batched_pool_runner, batch
 
+config.load()
 log = Logger('rep0st')
+rep0st_instance = None
+
+
+def get_rep0st():
+    global rep0st_instance
+    if rep0st_instance is None:
+        rep0st_instance = rep0st(
+            create_engine(
+                'mysql+cymysql://' + config.mysql_config['user'] + ':' + config.mysql_config['password'] + '@' +
+                config.mysql_config['host'] + '/' + config.mysql_config['database'] + '?charset=utf8'),
+            redis.StrictRedis(host=config.redis_config['host'], port=config.redis_config['port'],
+                              db=config.redis_config['database']),
+            config.image_config['path'])
+    return rep0st_instance
 
 
 class rep0st():
@@ -31,9 +49,9 @@ class rep0st():
         id = self.database.latest_post_id()
         log.info("starting database update. latest post {}", id)
         counter = 0
-        for batch in util.batch(1000, iterate_posts(id)):
-            counter += len(batch)
-            self.database.get_session().bulk_save_objects(batch)
+        for b in batch(1000, iterate_posts(id)):
+            counter += len(b)
+            self.database.get_session().bulk_save_objects(b)
 
         self.database.get_session().commit()
         log.info("finished database update. added {} posts to database", counter)
@@ -89,7 +107,7 @@ class rep0st():
         if image is None:
             return None
         else:
-            result = analyze.analyze_image(image)
+            result = analyze_image(image)
             return post, result
 
     def get_index(self):

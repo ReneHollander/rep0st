@@ -2,7 +2,6 @@ import sys
 from collections import namedtuple
 from concurrent.futures import wait, FIRST_COMPLETED
 from itertools import islice
-from json import JSONEncoder
 
 import numpy
 

@@ -10,11 +10,11 @@ from logbook import Logger
 import config
 from rep0st import api, analyze
 from rep0st.database import PostStatus, Feature, FeatureType, PostType
+from rep0st.rep0st import get_rep0st
 
+config.load()
 log = Logger('background-job')
-
-rep = config.get_rep0st()
-
+rep = get_rep0st()
 current_index = 1
 
 

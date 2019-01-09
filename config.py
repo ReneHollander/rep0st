@@ -3,11 +3,7 @@ import sys
 
 import logbook
 import msgpack_numpy
-import redis
 from logbook.compat import RedirectLoggingHandler
-from sqlalchemy import create_engine
-
-import rep0st
 
 IS_PRODUCTION = False
 
@@ -16,8 +12,8 @@ pr0gramm_config = {
         'api': 'https://pr0gramm.com/api',
         'img': 'https://img.pr0gramm.com',
     },
-    'username': 'USERNAME',
-    'password': 'PASSWORD',
+    'username': 'rep0stBot',
+    'password': 'wugwLbVs8LDbwlEjwu9c',
 }
 
 mysql_config = {
@@ -59,20 +55,6 @@ else:
         logbook.StreamHandler(sys.stdout, level=logbook.DEBUG),
         logbook.TimedRotatingFileHandler('logs/rep0st.log', date_format='%d-%m-%Y', bubble=True, level=logbook.DEBUG),
     ]
-
-rep0st_instance = None
-
-
-def get_rep0st():
-    global rep0st_instance
-    if rep0st_instance is None:
-        rep0st_instance = rep0st(
-            create_engine('mysql+cymysql://' + mysql_config['user'] + ':' + mysql_config['password'] + '@' +
-                          mysql_config['host'] + '/' + mysql_config['database'] + '?charset=utf8'),
-            redis.StrictRedis(host=redis_config['host'], port=redis_config['port'], db=redis_config['database']),
-            image_config['path'])
-    return rep0st_instance
-
 
 is_loaded = False
 

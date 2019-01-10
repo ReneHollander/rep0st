@@ -12,8 +12,8 @@ pr0gramm_config = {
         'api': 'https://pr0gramm.com/api',
         'img': 'https://img.pr0gramm.com',
     },
-    'username': 'rep0stBot',
-    'password': 'wugwLbVs8LDbwlEjwu9c',
+    'username': 'USERNAME',
+    'password': 'PASSWORD',
 }
 
 mysql_config = {

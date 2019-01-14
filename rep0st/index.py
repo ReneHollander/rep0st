@@ -73,8 +73,11 @@ class Rep0stIndex:
 
         list = []
         for item in nearest:
-            post = self.rep0st.database.get_post_by_id(item.value)
-            list.append(SearchResult(post, item.priority))
+            try:
+                post = self.rep0st.database.get_post_by_id(item.value)
+                list.append(SearchResult(post, item.priority))
+            except:
+                log.error("image with id {} returned by index, but not in database", item.value)
 
         stop = time()
 

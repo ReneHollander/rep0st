@@ -1,7 +1,7 @@
 import sys
 
 import msgpack_numpy
-from logbook.compat import redirect_logging, StreamHandler
+import logbook
 
 IS_PRODUCTION = False
 
@@ -52,8 +52,8 @@ def load():
         # Patch numpy types into msgpack
         msgpack_numpy.patch()
 
-        StreamHandler(sys.stdout, level=logbook.DEBUG).push_application()
-        redirect_logging()
+        logbook.StreamHandler(sys.stdout, level=logbook.DEBUG).push_application()
+        logbook.compat.redirect_logging()
         is_loaded = True
 
 

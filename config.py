@@ -1,9 +1,7 @@
-import logging
 import sys
 
-import logbook
 import msgpack_numpy
-from logbook.compat import RedirectLoggingHandler
+from logbook.compat import redirect_logging, StreamHandler
 
 IS_PRODUCTION = False
 
@@ -45,17 +43,6 @@ backgroundjob_config = {
     'update_index_every_seconds': 60,
 }
 
-if IS_PRODUCTION:
-    log_handlers = [
-        logbook.StreamHandler(sys.stdout, level=logbook.INFO),
-        logbook.TimedRotatingFileHandler('logs/rep0st.log', date_format='%d-%m-%Y', bubble=True, level=logbook.DEBUG),
-    ]
-else:
-    log_handlers = [
-        logbook.StreamHandler(sys.stdout, level=logbook.DEBUG),
-        logbook.TimedRotatingFileHandler('logs/rep0st.log', date_format='%d-%m-%Y', bubble=True, level=logbook.DEBUG),
-    ]
-
 is_loaded = False
 
 
@@ -65,19 +52,8 @@ def load():
         # Patch numpy types into msgpack
         msgpack_numpy.patch()
 
-        # Redirect flask logger to logbook
-        werkzeug_logger = logging.getLogger('werkzeug')
-        del werkzeug_logger.handlers[:]
-        werkzeug_logger.addHandler(RedirectLoggingHandler())
-
-        # Override the built-in werkzeug logging function in order to change the log line format.
-        from werkzeug.serving import WSGIRequestHandler
-        WSGIRequestHandler.log = lambda self, type, message, *args: getattr(werkzeug_logger, 'debug')(
-            '%s %s' % (self.address_string(), message % args))
-
-        # Register loggers
-        for handler in log_handlers:
-            handler.push_application()
+        StreamHandler(sys.stdout, level=logbook.DEBUG).push_application()
+        redirect_logging()
         is_loaded = True
 
 

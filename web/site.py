@@ -57,22 +57,31 @@ def search():
 
 @app.route("/api/search", methods=["POST"])
 def api_search_upload():
-    if 'image' not in request.files:
-        return api_response(error="invalid or no image", status=400)
+    url = request.form.get("url")
+    curr_image = None
 
-    image_file = request.files['image']
-    if image_file.filename == '':
-        return api_response(error="invalid or no image", status=400)
-
-    image = numpy.fromstring(image_file.read(), numpy.uint8)
-
-    results = analyze_image(image)
-    if results:
-        return api_response(resp=results, status=200)
+    if url != "" and 'image' in request.files and request.files['image'].filename != '':
+        return api_response(error="invalid url or image", status=400)
     else:
-        return api_response(error="invalid or no image", status=400)
-
-
+        try:
+            if url != "":
+                curr_image = get_image_from_url(url)
+                if curr_image is None:
+                    return api_response(error="invalid url or image", status=400)
+            elif 'image' in request.files and request.files['image'].filename != '':
+                curr_image = numpy.fromstring(request.files['image'].read(), numpy.uint8)
+            else:
+                return api_response(error="invalid url or image", status=400)
+        except:
+            traceback.print_exc()
+            return api_response(error="invalid url or image", status=400)           
+        if curr_image is not None:
+            results = analyze_image(curr_image)
+            if results:
+                return api_response(resp=results, status=200)
+            else:
+                return api_response(error="invalid url or image", status=400)
+                
 def api_response(resp=None, error=None, status=200):
     if error is not None:
         resp = {'error': error}

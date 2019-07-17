@@ -57,7 +57,7 @@ Name of image part: `image`
 **Content** :
 ```json
 {
-    "error": "invalid or no image"
+    "error": "invalid url or image"
 }
 ```
 ## Notes

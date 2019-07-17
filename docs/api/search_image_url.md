@@ -1,6 +1,6 @@
 # Search image (image url)
 
-Searches for similar images given by the query image.
+Searches for similar images given by the query image url.
 
 **URL** : `/api/search/`
 

@@ -77,11 +77,9 @@ def api_search_URL():
     url = request.args.get("url")
     search_results = None
     curr_image = None
-   
-
     try:
         if url == "":
-		    return api_response(error="url parameter missing", status=400)
+            return api_response(error="url parameter missing", status=400)
         curr_image = get_image_from_url(url)
         if curr_image is None:
             return api_response(error="url is invalid", status=400)

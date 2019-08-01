@@ -83,15 +83,13 @@ def api_search_URL():
         curr_image = get_image_from_url(url)
         if curr_image is None:
             return api_response(error="url is invalid", status=400)
-
-
         search_results = analyze_image(curr_image)
         if search_results is None:
-            return api_response(error="Servererror", status=500)
+            return api_response(error="internal server error", status=500)
         return api_response(resp=search_results, status=200)
     except:
         traceback.print_exc()
-        return api_response(error="Servererror", status=500)		
+        return api_response(error="internal server error", status=500)		
 
 def api_response(resp=None, error=None, status=200):
     if error is not None:

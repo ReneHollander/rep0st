@@ -78,7 +78,7 @@ def api_search_URL():
     search_results = None
     curr_image = None
     try:
-        if url == "":
+        if not url:
             return api_response(error="url parameter missing", status=400)
         curr_image = get_image_from_url(url)
         if curr_image is None:
@@ -89,7 +89,7 @@ def api_search_URL():
         return api_response(resp=search_results, status=200)
     except:
         traceback.print_exc()
-        return api_response(error="internal server error", status=500)		
+        return api_response(error="internal server error", status=500)
 
 def api_response(resp=None, error=None, status=200):
     if error is not None:

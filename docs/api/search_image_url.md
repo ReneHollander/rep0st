@@ -1,6 +1,6 @@
 # Search image (url)
 
-Searches for similar images given by the query image url.
+Searches for similar images by the image returned by a GET request to the given URL.
 
 **URL** : `/api/search?url=<image link>`
 
@@ -46,7 +46,7 @@ Searches for similar images given by the query image url.
 
 ## Error Responses
 
-**Condition** : If there was no url or the supplied is invalid.
+**Condition** : If there was no url or the supplied url yields no response".
 
 **Code** : `400 BAD REQUEST`
 

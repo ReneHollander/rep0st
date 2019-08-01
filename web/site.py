@@ -72,6 +72,24 @@ def api_search_upload():
     else:
         return api_response(error="invalid or no image", status=400)
 
+@app.route("/api/search", methods=["GET"])
+def api_search_URL():
+    url = request.args.get("url")
+    search_results = None
+    curr_image = None
+    try:
+        if not url:
+            return api_response(error="url parameter missing", status=400)
+        curr_image = get_image_from_url(url)
+        if curr_image is None:
+            return api_response(error="url is invalid", status=400)
+        search_results = analyze_image(curr_image)
+        if search_results is None:
+            return api_response(error="internal server error", status=500)
+        return api_response(resp=search_results, status=200)
+    except:
+        traceback.print_exc()
+        return api_response(error="internal server error", status=500)
 
 def api_response(resp=None, error=None, status=200):
     if error is not None:

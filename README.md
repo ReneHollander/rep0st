@@ -6,6 +6,7 @@ Sourcecode von rep0st, der Bilder Suchmaschine für [pr0gramm](https://pr0gramm.
 - Rene Hollander ([user/Rene8888](http://pr0gramm.com/user/Rene8888))
 - Patrick Malik
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
+- Vanilla-Chan ([user/TollesEinhorn](https://pr0gramm.com/user/TollesEinhorn)): API für URL Suche 
 
 ## Documentation
 * [API](docs/api): Documentation of the rep0st API.

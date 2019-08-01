@@ -2,7 +2,7 @@
 
 Searches for similar images given by the query image url.
 
-**URL** : `/api/search/?url=<image link>`
+**URL** : `/api/search?url=<image link>`
 
 **Method** : `GET`
 

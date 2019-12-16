@@ -153,7 +153,7 @@ class Tag(Base):
     __tablename__ = 'tag'
     id = Column(Integer, primary_key=True, index=True)
     post_id = Column(Integer, nullable=False, index=True)
-    tag = Column(Integer, nullable=False, index=True)
+    tag = Column(String(256), nullable=False, index=True)
     up = Column(Integer, nullable=False)
     down = Column(Integer, nullable=False)
     confidence = Column(Float, nullable=False, index=True)
@@ -173,44 +173,52 @@ class Database():
         Base.metadata.create_all(self.engine)
         Base.metadata.bind = self.engine
         self.DBSession = sessionmaker(bind=self.engine, expire_on_commit=False)
-
-        self.session = self.DBSession()
         log.info("connected to database {}", engine)
 
     def latest_post_id(self):
-        id = self.session.query(func.max(Post.id).label('latest_post_id')).one()[0]
-        return 0 if id is None else id
+        session = self.DBSession()
+        res = session.query(func.max(Post.id).label('latest_post_id')).scalar()
+        session.close()
+        return res
 
     def latest_tag_id(self):
-        id = self.session.query(func.max(Tag.id).label('latest_tag_id')).one()[0]
-        return 0 if id is None else id
-
-    def get_session(self):
-        return self.session
+        session = self.DBSession()
+        res = session.query(func.max(Tag.id).label('latest_tag_id')).scalar()
+        session.close()
+        return res
 
     def get_engine(self):
         return self.engine
 
     def get_posts(self, type=None):
+        session = self.DBSession()
+        res = None
         if type is not None:
-            return self.session.query(Post).filter(Post.type == type)
+            res = session.query(Post).filter(Post.type == type)
         else:
-            return self.session.query(Post)
+            res = session.query(Post)
+        session.close()
+        return res
 
     def get_posts_missing_features(self):
-        return self.session.query(Post).filter((Post.type == PostType.IMAGE) & (Post.status == PostStatus.NOT_INDEXED))
+        session = self.DBSession()
+        res = session.query(Post).filter((Post.type == PostType.IMAGE) & (Post.status == PostStatus.NOT_INDEXED))
+        session.close()
+        return res
 
     def post_count(self):
-        return self.session.query(func.count(Post.id)).filter(Post.type == PostType.IMAGE).one()[0]
+        session = self.DBSession()
+        res = session.query(func.count(Post.id)).filter(Post.type == PostType.IMAGE).scalar()
+        session.close()
+        return res
 
     def get_post_by_id(self, id):
-        return self.session.query(Post).filter_by(id=id).one()
-
-    def commit(self):
-        self.session.commit()
+        session = self.DBSession()
+        res = session.query(Post).filter_by(id=id).scalar()
+        session.close()
+        return res
 
     def close(self):
         log.debug("closing database connection {}", self.engine)
-        self.session.close()
         self.engine.dispose()
         log.debug("closed database connection {}", self.engine)

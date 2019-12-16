@@ -30,7 +30,8 @@ def update(index_id):
         counter += 1
         posts.append(post)
         ids.append(post.id)
-        rep.database.get_session().add(post)
+        session = rep.database.DBSession()
+        session.add(post)
         if post.type == PostType.IMAGE:
             image = rep.read_image(post)
             if image is not None:
@@ -38,14 +39,17 @@ def update(index_id):
                 post.status = PostStatus.INDEXED
 
                 for type, data in result.items():
-                    rep.database.session.merge(Feature.from_analyzeresult(post, type, data))
+                    session.merge(Feature.from_analyzeresult(post, type, data))
                     if type == FeatureType.FEATURE_VECTOR:
                         features_FEATURE_VECTOR.append(msgpack.packb({
                             'id': post.id,
                             'data': data
                         }))
+        else:
+            rep.download_post_media(post)
 
-        rep.database.get_session().commit()
+        session.commit()
+        session.close()
     if len(features_FEATURE_VECTOR) > 0:
         rep.redis.lpush('rep0st-latest-feature-vectors-index-' + str(index_id), *features_FEATURE_VECTOR)
 
@@ -56,18 +60,19 @@ def build_index(index_id):
     n_trees = config.index_config['tree_count']
 
     log.info("started index build")
-    count = rep.database.session.query(Feature).filter(Feature.type == FeatureType.FEATURE_VECTOR).count()
+    session = rep.database.DBSession()
+    count = session.query(Feature).filter(Feature.type == FeatureType.FEATURE_VECTOR).count()
     index = AnnoyIndex(108, metric='euclidean')
     cnt = 0
     log.info("adding {} features to index", count)
     start = time.time()
-    for feature in rep.database.session.query(Feature).filter(Feature.type == FeatureType.FEATURE_VECTOR).yield_per(
-            1000):
+    for feature in session.query(Feature).filter(Feature.type == FeatureType.FEATURE_VECTOR).yield_per(1000):
         arr = np.asarray(bytearray(feature.data)).astype(np.float32)
         index.add_item(feature.post_id, arr)
         cnt += 1
         if cnt % 10000 == 0:
             log.debug("added {}/{} features to the index", cnt, count)
+    session.close()
     stop = time.time()
     log.info("added all {} features to the index in {}", count, str(datetime.timedelta(seconds=stop - start)))
     log.info("building index with {} trees. this will take a while...", n_trees)

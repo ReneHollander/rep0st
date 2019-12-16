@@ -12,7 +12,9 @@ if __name__ == '__main__':
 
     counter = 0
     for batch in util.batch(10000, api.iterate_tags(start=rep.database.latest_tag_id())):
-        rep.database.session.bulk_save_objects(batch)
-        rep.database.get_session().commit()
+        session = rep.database.DBSession()
+        session.bulk_save_objects(batch)
+        session.commit()
+        session.close()
 
     rep.close()

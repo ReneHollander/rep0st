@@ -48,12 +48,14 @@ class rep0st():
     def update_database(self):
         id = self.database.latest_post_id()
         log.info("starting database update. latest post {}", id)
+        session = self.database.DBSession()
         counter = 0
         for b in batch(1000, iterate_posts(id)):
             counter += len(b)
-            self.database.get_session().bulk_save_objects(b)
+            session.bulk_save_objects(b)
 
-        self.database.get_session().commit()
+        session.commit()
+        session.close()
         log.info("finished database update. added {} posts to database", counter)
 
     def update_features(self):
@@ -95,7 +97,6 @@ class rep0st():
 
         session.commit()
         session.close()
-        self.database.commit()
 
         log.info("finished updating features. calculated {} new features", cnt)
 
@@ -136,6 +137,18 @@ class rep0st():
             }
         }
 
+    def download_post_media(self, post):
+        try:
+            img_file = Path(self.imgdir) / post.image
+            if img_file.is_file():
+                return
+            data = download_image(post)
+            with img_file.open("wb") as f:
+                f.write(data)
+        except:
+            log.exception("marking post {} as broken, because downloading image \"{}\" caused an error", post, post.image)
+            post.status = PostStatus.BROKEN
+
 
 def read_image(imgdir, database, post):
     try:
@@ -153,8 +166,8 @@ def read_image(imgdir, database, post):
             image = imdecode(np.asarray(bytearray(data), dtype=np.uint8), cv2.IMREAD_COLOR)
     except HTTPError as e:
         if e.response.status_code == 404:
-            log.info("deleting post {} because the image \"{}\" was deleted from the server", post, post.image)
-            database.session.delete(post)
+            log.exception("marking post {} as broken, because the image \"{}\" was not found on the server", post, post.image)
+            post.status = PostStatus.BROKEN
             return None
         else:
             raise e

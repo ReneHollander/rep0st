@@ -94,4 +94,6 @@ def dist(x, y):
 def AutoJSONEncoder(obj):
     if hasattr(obj, '__json__'):
         return obj.__json__()
-    raise TypeError(repr(obj) + " is not JSON serializable")
+    elif isinstance(obj, numpy.float32):
+        return float(obj)
+    raise TypeError("{} of type {} is not JSON serializable".format(obj, type(obj)))

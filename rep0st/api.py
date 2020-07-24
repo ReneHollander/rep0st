@@ -43,6 +43,8 @@ def perform_request(url):
         if response.status_code == 403:
             perform_login()
             continue
+        if response.status_code == 404:
+          raise Exception("request to url {} failed with 404")
         elif response.status_code != 200:
             log.warn("request finished with status {}: {}. retrying in 3 seconds", response.status_code, response.text)
             error_count = error_count + 1

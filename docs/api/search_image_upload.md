@@ -7,7 +7,7 @@ Searches for similar images given by the query image.
 **Method** : `POST`
 
 **Data**:
-Content-Type: `multipart/from-data`
+Content-Type: `multipart/form-data`
 Name of image part: `image`
 
 ## Success Response

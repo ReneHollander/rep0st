@@ -1,9 +1,12 @@
-*.sql
-*.ann
-*.gz
-.idea/
 __pycache__
 *.pyc
+<<<<<<< HEAD
 *.xz
 logs/
 venv/
+=======
+
+/.idea/
+/data/
+/secrets/
+>>>>>>> 0f20471 (Rewrote everything...)

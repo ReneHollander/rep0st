@@ -1,0 +1,11 @@
+#!/bin/bash
+set -eo pipefail
+
+host="$(hostname --ip-address || echo '127.0.0.1')"
+port="${1:-5000}"
+
+if health="$(curl -fsSL "http://$host:$port/metricz")"; then
+	exit 0
+fi
+
+exit 1

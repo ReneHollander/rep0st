@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rep0st</title>
+    <link rel="shortcut icon" type="image/png" href="/static/images/logo.png"/>
+    <link href="/static/css/stylesheet.css" rel="stylesheet" type="text/css">
+
+    {% if GA %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA.measurement_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '{{ GA.measurement_id }}');
+    </script>
+    {% endif %}
+</head>
+<body>
+
+<header>
+    <a href="/">
+        <div class="header-title">
+            <img src="/static/images/logo.png" alt="rep0st logo">
+            <div>rep0st</div>
+        </div>
+    </a>
+    <div class="header-links">
+        <a target="_blank" href="https://github.com/ReneHollander/rep0st">Github</a>
+    </div>
+</header>
+
+<main>
+    <form class="search" action="/" enctype="multipart/form-data" method="post">
+        <div class="image">
+            <label for="upload-image">Bild</label>
+            <input id="upload-image" name="image" type="file">
+        </div>
+        <div class="url">
+            <label for="upload-url">oder URL</label>
+            <input type="text" name="url" id="upload-url" placeholder="http://">
+        </div>
+        <div>
+            <input type="submit" value="rep0st?"/>
+            {% if error %}
+            <span id="search-error">
+                Ein Fehler ist aufgetreten: {{error}}
+            </span>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if search_results %}
+    <h2>Ähnliche Bilder</h2>
+    <div class="search-results">
+        {% for search_result in search_results %}
+        <a target="_blank" href="https://pr0gramm.com/new/{{search_result.post.id}}">
+            <div class="search-result">
+                <span>{{"%.2f%%" | format(search_result.score * 100) }}</span>
+                <img src="https://img.pr0gramm.com/{{search_result.post.image}}" alt="Post {{search_result.post.id}}">
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div>
+        <h2>
+            Wie funktioniert rep0st?
+        </h2>
+        <p>
+            Mithilfe unserer Skalarwellentechnologie wurden alle Bilder, die je auf dem pr0gramm gepostet wurden, auf einem geheimen
+            SNASA Cluster aufbereitet und indiziert. Mithilfe von reichlich Magie wird dann dein Bild mit der Datenbank
+            abgeglichen. Angezeigt werden dann alle Posts, die deinem Bild ähnlich sind! (Kann p0rn und g0re enthalten!)
+        </p>
+        <p>
+            Die Suche ist natürlich nicht perfekt. Wenn kein ähnliches Bild gefunden
+            wurde, heißt das nicht, dass heute kein rep0st deinen Keller verlassen wird.
+            Findest du unter den Ergebnissen jedoch einen Upload und lädst das Bild trotzdem
+            hoch, so ist Minusbenis nicht mehr weit.
+        </p>
+        <p>
+            Durchsucht werden alle sfw, nsfw und nsfl Bilder von <strong>1-{{stats["latest_post"]}}</strong>.<br>
+            Für Benisverkürzungen, die durch nicht erkannte Reposts entstanden sind, können wir nicht haften!
+        </p>
+        <p>
+            Sourcecode: <a href="https://github.com/ReneHollander/rep0st">github.com/ReneHollander/rep0st</a><br>
+            Kontakt: <a href="https://pr0gramm.com/user/Rene8888">/user/Rene8888</a>
+        </p>
+    </div>
+    {% endif %}
+</main>
+
+<footer>
+    <a href="https://github.com/ReneHollander/rep0st/{{ FRAMEWORK_BUILD_INFO.git_sha }}">{{ FRAMEWORK_BUILD_INFO.git_sha }}</a>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+yapf = "*"
+
+[packages]
+absl-py = "*"
+sqlalchemy = "*"
+injector = "*"
+logstash-formatter = "*"
+crontab = "*"
+numpy = "*"
+requests = "*"
+cymysql = "*"
+pywavelets = "*"
+joblib = "*"
+elasticsearch = "*"
+elasticsearch-dsl = "*"
+prometheus-client = "*"
+cheroot = "*"
+jinja2 = "*"
+werkzeug = "*"
+opencv-contrib-python-headless = "*"
+
+[requires]
+python_version = "3.9"

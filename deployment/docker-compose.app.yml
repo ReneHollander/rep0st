@@ -1,0 +1,72 @@
+version: '3.9'
+
+services:
+  update_posts:
+    build:
+      context: ../
+      dockerfile: deployment/rep0st.Dockerfile
+    restart: always
+    command:
+      - rep0st.job.update_posts_job
+      - --pr0gramm_api_user_file=/run/secrets/pr0gramm_user
+      - --pr0gramm_api_password_file=/run/secrets/pr0gramm_password
+      - --pr0gramm_api_limit_id_to=100
+      - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
+      - --rep0st_update_all_posts_job_schedule=*/5 * * * *
+      - --rep0st_media_path=/media/
+    depends_on:
+      - mdb01
+    ports:
+      - 5001:5000
+    volumes:
+      - media:/media
+    secrets:
+      - pr0gramm_user
+      - pr0gramm_password
+
+  update_features:
+    build:
+      context: ../
+      dockerfile: deployment/rep0st.Dockerfile
+    restart: always
+    command:
+      - rep0st.job.update_features_job
+      - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
+      - --rep0st_elasticsearch_uris=http://es01:9200
+      - --rep0st_media_path=/media/
+    depends_on:
+      - mdb01
+      - es01
+    ports:
+      - 5002:5000
+    volumes:
+      - media:/media:ro
+
+  web:
+    build:
+      context: ../
+      dockerfile: deployment/rep0st.Dockerfile
+    restart: always
+    command:
+      - rep0st.web
+      - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
+      - --rep0st_elasticsearch_uris=http://es01:9200
+    depends_on:
+      - mdb01
+      - es01
+    ports:
+      - 5000:5000
+
+secrets:
+  pr0gramm_user:
+    file: ../secrets/pr0gramm_user.txt
+  pr0gramm_password:
+    file: ../secrets/pr0gramm_password.txt
+
+volumes:
+  mdb01data:
+    driver: local
+  es01data:
+    driver: local
+  media:
+    driver: local

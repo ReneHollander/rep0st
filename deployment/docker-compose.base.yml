@@ -1,0 +1,48 @@
+version: '3.9'
+
+services:
+  mdb01:
+    build:
+      context: ./
+      dockerfile: mariadb.Dockerfile
+    restart: always
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_DATABASE: rep0st
+      MYSQL_USER: rep0st
+      MYSQL_ROOT_PASSWORD: pw
+      MYSQL_PASSWORD: pw
+    ports:
+      - 3306:3306
+    volumes:
+      - mdb01data:/var/lib/mysql
+
+  es01:
+    build:
+      context: ./
+      dockerfile: elastiksearch.Dockerfile
+    restart: always
+    environment:
+      - cluster.name=es-cluster
+      - node.name=es01
+      - discovery.seed_hosts=es01
+      - cluster.initial_master_nodes=es01
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms4096m -Xmx4096m"
+    ports:
+      - 9200:9200
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - es01data:/usr/share/elasticsearch/data
+
+volumes:
+  mdb01data:
+    driver: local
+  es01data:
+    driver: local

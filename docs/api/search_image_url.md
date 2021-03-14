@@ -53,12 +53,12 @@ Searches for similar images by the image returned by a GET request to the given 
 **Content** :
 ```json
 {
-    "error": "url is invalid""
+    "error": "url is invalid"
 }
 ```
 ```json
 {
-    "error": "url parameter missing""
+    "error": "url parameter missing"
 }
 ```
 ## Notes

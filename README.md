@@ -1,71 +1,96 @@
 rep0st
 ======
-Sourcecode von rep0st, der Bilder Suchmaschine für [pr0gramm](https://pr0gramm.com). Erreichbar unter [rep0st.rene8888.at](https://rep0st.rene8888.at/)
+rep0st, the reverse image search for [pr0gramm](https://pr0gramm.com). Available at [rep0st.rene8888.at](https://rep0st.rene8888.at/).
 
-# Autoren
+# Documentation
+* [API](docs/api): Documentation of the rep0st API.
+
+## Architecture
+The application unnecessarily contains a home brew framework using [Injector](https://injector.readthedocs.io/en/latest/).
+It builds upon [SQLAlchemy](https://www.sqlalchemy.org/) as an ORM Mapper with MariaDB as a backing database,
+[Cheroot](https://pypi.org/project/cheroot/) as a WSGI server and some custom DI stuff to glue it all together. On top
+of that OpenCV is used for image processing, Elasticsearch with the [Elastiknn](https://github.com/alexklibisz/elastiknn)
+plugin for indexing the features. Metrics are exported in the Prometheus format on the `/metricz` endpoints.
+
+There is no technical reason for there being a custom framework. The author was just very bored and wanted to build
+one.
+
+## Running the application
+Please run all commands from in the project root directory.
+
+### Required software
+- Docker and Docker Compose
+- pyenv and pipenv
+
+### Setup MariaDB and Elasticsearch
+Start MariaDB and Elasticsearch with the correct versions locally.
+```shell
+docker-compose -p rep0st -f deployment/docker-compose.base.yml build
+docker-compose -p rep0st -f deployment/docker-compose.base.yml up -d
+```
+See deployment/README.md for more info on how to run the application only
+using docker and to see the settings that are used.
+
+### Setup the Python development environment
+#### Download dependencies
+```shell
+pipenv install --dev
+```
+
+#### Run parts of the application
+The following steps should be done at least once to get the minimal state into the database
+to be able to only run parts of it for development.
+
+#### Post update job
+Run the update job once and fill the database with the first 500 posts.  
+Note: The application won't close after the oneshot job finished. It can
+be terminated by sending a SIGINT.
+```shell
+pipenv run python -m rep0st.job.update_posts_job \
+  --rep0st_database_uri=mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4 \
+  --pr0gramm_api_user=<your pr0gramm user> \
+  --pr0gramm_api_password=<your pr0gramm password> \
+  --rep0st_media_path=./data/ \
+  --pr0gramm_api_limit_id_to=500 \
+  --rep0st_update_posts_job_schedule=oneshot
+```
+
+#### Post features job
+Run the update job once and calculate features and fill the Elasticsearch index to be able to
+perform lookups.
+Note: The application won't close after the oneshot job finished. It can
+be terminated by sending a SIGINT.
+```shell
+pipenv run python -m rep0st.job.update_features_job \
+  --rep0st_database_uri=mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4 \
+  --rep0st_media_path=./data/ \
+  --rep0st_update_features_job_schedule=oneshot
+```
+
+#### Web
+This runs the user facing web application serving the page, API and processing lookups.
+```shell
+pipenv run python -m rep0st.web \
+  --rep0st_database_uri=mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4
+```
+
+# Pull Requests
+Run the autoformatter before sending a Pull Request to ensure all files are nicely formatted:
+```shell
+pipenv run yapf -ir rep0st
+```
+
+# Authors
 - Rene Hollander ([user/Rene8888](http://pr0gramm.com/user/Rene8888))
 - Patrick Malik
 - mopsalarm ([user/mopsalarm](http://pr0gramm.com/user/mopsalarm))
-- Vanilla-Chan ([user/TollesEinhorn](https://pr0gramm.com/user/TollesEinhorn)): API für URL Suche 
+- Vanilla-Chan ([user/TollesEinhorn](https://pr0gramm.com/user/TollesEinhorn)): API für URL Suche
 
-## Documentation
-* [API](docs/api): Documentation of the rep0st API.
-
-## Entwickeln
-Entweder Virtuelle Maschine verwenden oder unter Linux versuchen aufzusetzen.
-
-### Virtuelle Maschine
-Download: [rep0st.ova](https://files.rene8888.at/rep0st/rep0st.ova)
-
-#### Einstellungen (Virtual Box)
-##### Gemeinsame Ordner
-
-| Name | Pfad (Beispiel) | Verwendung |
-| ------------- | ------------- | ------------- |
-| pr0gramm  | E:\pr0gramm  | Speicherort der heruntergeladenen Bilder. |
-| rep0st  | C:\Users\Rene Hollander\repositories\rep0st | Pfad zum Workspace. |
-
-##### Netzwerk
-
-| Typ | IPv4 Adresse | IPv4 Netzmaske | DHCP |
-| ------------- | ------------- | ------------- | ------------- |
-| Host Only  | 192.168.10.100 | 255.255.255.0 | deaktiviert  |
-
-#### Verwedung
-##### Logins
-
-| Wofür | Name | Passwort |
-| ------------- | ------------- | ------------- | 
-| User  | root  | root |
-| User  | rene | rene |
-| MySQL | root | root |
-| MySQL | rep0st | rep0stpw |
-
-##### Starten
-1. VM Starten
-2. Mit PuTTY verbinden
-   - Adresse: 192.168.10.20
-   - User: rene
-   - Passwort: rene
-3. Einmalig den folgenden Befehl ausführen: mkdir /media/pr0gramm/images
-4. `cd rep0st/`: Hier wird der gemeinsame Ordner gemounted.
-5. `./run background_job`: Macht ein Update vom Index und provisioniert Redis (Kann durch große Anzahl an Bildern sehr lange dauern!). Nachdem der Index gebaut wurde kann mit CTRL+C beendet werden.
-6. `./run site`: Frontend starten. Nach jeder Änderung am Code einfach neu starten.
-7. Wenn fertig, Zustand der VM speichern, dann muss beim nächsten Start der Background Job nicht ausgeführt werden.
-
-### Abhängigkeiten
-- MariaDB
-- Redis
-- Python 3.6
-```
-pip install -U annoy cymysql Flask Logbook msgpack-numpy msgpack-python PyWavelets redis requests schedule SQLAlchemy opencv-python numpy simplejson
-```
-
-## Lizenz
+# License
 ```
 The MIT License (MIT)
 
-Copyright (c) 2015-2019 mopsalarm, Rene Hollander, Patrick Malik and contributors
+Copyright (c) 2015-2021 Rene Hollander, Patrick Malik, mopsalarm and contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

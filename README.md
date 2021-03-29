@@ -31,7 +31,7 @@ Download: [rep0st.ova](https://files.rene8888.at/rep0st/rep0st.ova)
 | ------------- | ------------- | ------------- | ------------- |
 | Host Only  | 192.168.10.100 | 255.255.255.0 | deaktiviert  |
 
-#### Verwedung
+#### Verwendung
 ##### Logins
 
 | Wofür | Name | Passwort |

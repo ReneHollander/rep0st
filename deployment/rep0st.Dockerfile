@@ -7,13 +7,6 @@ ENV PYTHONFAULTHANDLER 1
 
 RUN apt-get update && apt-get dist-upgrade -y
 
-ARG BRANCH="no_branch"
-ARG COMMIT="no_commit"
-LABEL branch=${BRANCH}
-LABEL commit=${COMMIT}
-ENV COMMIT_SHA=${COMMIT}
-ENV COMMIT_BRANCH=${BRANCH}
-
 FROM base AS python-deps
 
 RUN apt-get install -y gcc
@@ -33,3 +26,10 @@ HEALTHCHECK CMD ["docker-healthcheck"]
 COPY rep0st /rep0st/
 WORKDIR /
 ENTRYPOINT ["python", "-m"]
+
+ARG BRANCH="no_branch"
+ARG COMMIT="no_commit"
+LABEL branch=${BRANCH}
+LABEL commit=${COMMIT}
+ENV COMMIT_SHA=${COMMIT}
+ENV COMMIT_BRANCH=${BRANCH}

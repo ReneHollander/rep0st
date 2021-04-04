@@ -31,13 +31,30 @@ _WebserverBindPortKey = NewType('_WebserverBindPortKey', str)
 log = logging.getLogger(__name__)
 request_logger = logging.getLogger(__name__ + '.request')
 
+framework_webserver_requests_z = Counter(
+    'framework_webserver_requests',
+    'Number of requests handled by the web server with the given status',
+    ['status'])
+framework_webserver_requests_z.labels(status=200)
+framework_webserver_requests_z.labels(status=404)
+framework_webserver_requests_z.labels(status=500)
 framework_webserver_endpoint_requests_z = Counter(
     'framework_webserver_endpoint_requests',
     'Number of requests per rule and status', ['rule', 'method', 'status'])
-framework_webserver_endpoint_request_time_z = Counter(
-    'framework_webserver_endpoint_request_time',
-    'Wall time spent processing requests per rule and status',
-    ['rule', 'method', 'status'])
+
+
+def _get_status_code(status: str):
+  if not status:
+    return -1
+  parts = status.split(' ')
+  if len(parts) < 1:
+    return -1
+  status = parts[0]
+  try:
+    status = int(status)
+  except ValueError:
+    return -1
+  return status
 
 
 class RequestLocal(threading.local):
@@ -72,6 +89,8 @@ class WSGILogger(object):
       nonlocal status
       nonlocal content_length
       status = status_
+      framework_webserver_requests_z.labels(
+          status=_get_status_code(status)).inc()
       for name, value in response_headers_:
         if name.lower() == 'content-length':
           content_length = value
@@ -130,10 +149,10 @@ class WebServer:
       return e.get_response(environ)(environ, start_response)
 
     def custom_start_response(status_, response_headers_, exc_info_=None):
-      status = int(status_.split(' ')[0])
       framework_webserver_endpoint_requests_z.labels(
-          rule=rule.rule, method=environ['REQUEST_METHOD'],
-          status=status).inc()
+          rule=rule.rule,
+          method=environ['REQUEST_METHOD'],
+          status=_get_status_code(status_)).inc()
       return start_response(status_, response_headers_, exc_info_)
 
     try:
@@ -141,7 +160,7 @@ class WebServer:
     except HTTPException as e:
       return e.get_response(environ)(environ, custom_start_response)
     except Exception as e:
-      log.exception('Unknown error occured processing request')
+      log.exception('Unknown error occurred processing request')
       return InternalServerError(
           description='Unknown error occurred',
           original_exception=e).get_response(environ)(environ,
@@ -215,6 +234,13 @@ class EndpointProcessor(DecoratorProcessor):
       if ep.wrap:
         wrapped_fun = self._wrap_request_response(wrapped_fun)
       for rule in ep.rules:
+        for method in rule.methods:
+          if method == 'HEAD':
+            # Ignore HEAD method to reduce noise.
+            continue
+          # Initialize metric for the given endpoint.
+          framework_webserver_endpoint_requests_z.labels(
+              rule=rule.rule, method=method, status=200)
         rule.endpoint = wrapped_fun
         # TODO(rhollander): Cleanup this dependency.
         # The result of process() should be used in a provider to inject the List[Rule]

@@ -62,7 +62,7 @@ class Api(MediaHelper):
   def _search(self, data: bytes) -> Response:
     try:
       results = self.post_search_service.search_file(data)
-    except NoMediaFoundException or ImageDecodeException:
+    except (NoMediaFoundException, ImageDecodeException):
       return self.render(error='invalid image', status=400)
     except:
       log.exception('Error while searching')

@@ -47,14 +47,14 @@ class DecodeMediaService:
   def decode_image_from_buffer(self, data: bytes) -> Iterable[numpy.ndarray]:
     try:
       data = numpy.frombuffer(data, dtype=numpy.uint8)
-    except IOError or OSError as e:
+    except (IOError, OSError) as e:
       raise NoMediaFoundException('Could not data from buffer') from e
     yield self._decode_image(data)
 
   def decode_image_from_file(self, file: BinaryIO) -> Iterable[numpy.ndarray]:
     try:
       data = numpy.fromfile(file, dtype=numpy.uint8)
-    except IOError or OSError as e:
+    except (IOError, OSError) as e:
       raise NoMediaFoundException(
           f'Could not read data from file {file}') from e
     yield self._decode_image(data)
@@ -68,11 +68,11 @@ class ReadMediaServiceModule(Module):
     binder.bind(ReadMediaService)
 
 
-class NoMediaFoundException(BaseException):
+class NoMediaFoundException(Exception):
   pass
 
 
-class ImageDecodeException(BaseException):
+class ImageDecodeException(Exception):
   pass
 
 
@@ -108,7 +108,7 @@ class ReadMediaService:
       with media_file.open("rb") as f:
         for image in self.decode_media_service.decode_image_from_file(f):
           yield image
-    except IOError or OSError as e:
+    except (IOError, OSError) as e:
       raise NoMediaFoundException(
           f'Could not read image for post {post.id} from file {media_file.absolute()}'
       ) from e

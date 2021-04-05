@@ -8,7 +8,8 @@ from werkzeug.routing import Rule
 
 from rep0st.db.post import PostRepository, PostRepositoryModule
 from rep0st.framework.data.transaction import transactional
-from rep0st.framework.web import endpoint
+from rep0st.framework.web import endpoint, request_data
+from rep0st.service.media_service import ImageDecodeException, NoMediaFoundException
 from rep0st.service.post_search_service import PostSearchService, PostSearchServiceModule
 from rep0st.web import MediaHelper
 from rep0st.web.templates import IndexTemplate
@@ -41,9 +42,10 @@ class Site(MediaHelper):
   def get_statistics(self):
     return {'latest_post': self.post_repository.get_latest_post_id()}
 
-  def render(self, **kwargs):
+  def render(self, status=200, **kwargs):
     return Response(
         self.index_template.render(stats=self.get_statistics(), **kwargs),
+        status=status,
         mimetype='text/html')
 
   def _file_from_url(self, url: str) -> Optional[bytes]:
@@ -76,10 +78,10 @@ class Site(MediaHelper):
     url = request.form.get('url')
 
     if file and url:
-      return self.render(error='Entweder Datei oder URL angeben!')
+      return self.render(status=400, error='Entweder Datei oder URL angeben!')
 
     if not file and not url:
-      return self.render(error='Datei oder URL angeben!')
+      return self.render(status=400, error='Datei oder URL angeben!')
 
     data = None
 
@@ -90,8 +92,16 @@ class Site(MediaHelper):
       data = self._file_from_url(url)
       if not data:
         return self.render(
-            error='Bild konnte nicht von der URL geladen werden!')
+            status=400, error='Bild konnte nicht von der URL geladen werden!')
 
-    results = self.post_search_service.search_file(data)
-
-    return self.render(search_results=results)
+    try:
+      results = self.post_search_service.search_file(data)
+      return self.render(search_results=results)
+    except (NoMediaFoundException, ImageDecodeException):
+      return self.render(status=400, error='Ungültiges Bild!')
+    except Exception:
+      log.exception('Error occured when searching for image')
+      return self.render(
+          status=500,
+          error=f'Unbekanner Fehler! Bitte inkludiere die folgende Identifikation wenn ein Bug Report erstellt wird: {request_data.id}'
+      )

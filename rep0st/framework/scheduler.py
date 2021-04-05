@@ -31,7 +31,7 @@ class SchedulerModule(Module):
     binder.bind(Scheduler)
 
 
-class _SignalFinish(BaseException):
+class _SignalFinish(Exception):
   pass
 
 

@@ -58,11 +58,11 @@ requests_z.labels(status='unknown')
 requests_z.labels(status='not_found')
 
 
-class LoginException(BaseException):
+class LoginException(Exception):
   pass
 
 
-class APIException(BaseException):
+class APIException(Exception):
   pass
 
 

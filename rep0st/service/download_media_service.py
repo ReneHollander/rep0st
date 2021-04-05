@@ -17,7 +17,7 @@ class DownloadMediaServiceModule(Module):
     binder.bind(DownloadMediaService)
 
 
-class DownloadMediaException(BaseException):
+class DownloadMediaException(Exception):
   pass
 
 
@@ -51,7 +51,7 @@ class DownloadMediaService:
         with media_file.open('wb') as f:
           f.write(data)
         return
-      except IOError or OSError as e:
+      except (IOError, OSError) as e:
         raise DownloadMediaException(
             f'Could not save media for post {post.id} to file {media_file.absolute()}'
         ) from e

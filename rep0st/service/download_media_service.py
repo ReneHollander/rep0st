@@ -1,12 +1,21 @@
 import logging
+import os
 from pathlib import Path
 from injector import Binder, Module, inject, singleton
+from prometheus_client import Counter
 
 from rep0st.db.post import Post, Type
 from rep0st.pr0gramm.api import APIException, Pr0grammAPI, Pr0grammAPIModule
 from rep0st.service.media_service import _MediaDirectory, _MediaFlagModule
 
 log = logging.getLogger(__name__)
+
+download_media_service_renamed_count_z = Counter(
+    'download_media_service_renamed_count',
+    'Number of successfully renamed media files')
+download_media_service_rename_errors_count_z = Counter(
+    'download_media_service_rename_errors_count',
+    'Number of errors encountered while performing media rename operations')
 
 
 class DownloadMediaServiceModule(Module):
@@ -71,3 +80,34 @@ class DownloadMediaService:
       log.error(
           f'Error downloading media for post {post.id} with unknown type {post.type}'
       )
+
+  def rename_media(self, old_post: Post, new_post: Post) -> Post:
+    if old_post.id != new_post.id:
+      raise ValueError(f'Posts have to have matching IDs')
+
+    def _do(old_media, new_media, dir_prefix=''):
+      if old_media == new_media:
+        log.debug(f'Media {old_media} already has the correct name')
+        return False
+      try:
+        old_file = self.media_dir / dir_prefix / old_media
+        new_file = self.media_dir / dir_prefix / new_media
+        log.debug(
+            f'Renaming files for post {old_post.id}: {old_file} -> {new_file}')
+        os.renames(old_file, new_file)
+        download_media_service_renamed_count_z.inc()
+        return True
+      except Exception:
+        log.exception(
+            f'Error moving media {old_media} to {new_media} for post {old_post.id} {old_post.status}'
+        )
+        download_media_service_rename_errors_count_z.inc()
+
+    if old_post.fullsize:
+      if _do(old_post.fullsize, new_post.fullsize, dir_prefix='full'):
+        old_post.fullsize = new_post.fullsize
+
+    if _do(old_post.image, new_post.image):
+      old_post.image = new_post.image
+
+    return old_post

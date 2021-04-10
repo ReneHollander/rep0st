@@ -2,7 +2,7 @@ import logging
 from typing import BinaryIO, Optional
 
 import requests
-from injector import Module, inject, singleton
+from injector import Module, ProviderOf, inject, singleton
 from werkzeug import Request, Response
 from werkzeug.routing import Rule
 
@@ -29,11 +29,12 @@ class SiteModule(Module):
 class Site(MediaHelper):
   post_search_service: PostSearchService = None
   post_repository: PostRepository = None
-  index_template: IndexTemplate = None
+  index_template: ProviderOf[IndexTemplate] = None
 
   @inject
   def __init__(self, post_search_service: PostSearchService,
-               post_repository: PostRepository, index_template: IndexTemplate):
+               post_repository: PostRepository,
+               index_template: ProviderOf[IndexTemplate]):
     self.post_search_service = post_search_service
     self.post_repository = post_repository
     self.index_template = index_template
@@ -44,7 +45,7 @@ class Site(MediaHelper):
 
   def render(self, status=200, **kwargs):
     return Response(
-        self.index_template.render(stats=self.get_statistics(), **kwargs),
+        self.index_template.get().render(stats=self.get_statistics(), **kwargs),
         status=status,
         mimetype='text/html')
 

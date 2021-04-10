@@ -1,10 +1,12 @@
 from pathlib import Path
 from typing import NewType
 
+import jinja2
 from absl import flags
-from injector import Binder, Module, provider
-from jinja2 import Environment, FileSystemLoader, Template, select_autoescape
+from injector import Binder, Module, provider, singleton
+from jinja2 import FileSystemLoader, Template, select_autoescape
 
+from rep0st.framework import Environment
 from rep0st.framework.app import COMMIT_SHA
 
 IndexTemplate = NewType('IndexTemplate', Template)
@@ -16,13 +18,18 @@ flags.DEFINE_string(
 )
 
 
-class _TemplateEnvironment(Environment):
+class _TemplateEnvironment(jinja2.Environment):
 
-  def __init__(self, **kwargs):
+  def __init__(self, env: Environment):
+    args = {}
+    args.update(auto_reload=False)
+    if env == Environment.DEVELOPMENT:
+      args.update(cache_size=0, auto_reload=True)
+
     super(_TemplateEnvironment, self).__init__(
         loader=FileSystemLoader(Path(__file__).parent.absolute()),
         autoescape=select_autoescape(),
-        **kwargs)
+        **args)
     self.globals['FRAMEWORK_BUILD_INFO'] = {'git_sha': COMMIT_SHA}
     if FLAGS.google_analytics_measurement_id:
       self.globals['GA'] = {
@@ -36,9 +43,11 @@ class TemplateModule(Module):
     pass
 
   @provider
-  def provide_environment(self) -> Environment:
-    return _TemplateEnvironment()
+  @singleton
+  def provide_environment(self, env: Environment) -> jinja2.Environment:
+    return _TemplateEnvironment(env)
 
   @provider
-  def provide_index_template(self, environment: Environment) -> IndexTemplate:
+  def provide_index_template(self,
+                             environment: jinja2.Environment) -> IndexTemplate:
     return environment.get_template('index.html')

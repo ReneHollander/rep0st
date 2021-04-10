@@ -53,10 +53,6 @@
 
     {% if search_results %}
     <h2>Ähnliche Bilder</h2>
-    <div class="issue-notification">
-        Aufgrund von Änderungen am pr0gramm können Thumbnails für NSFW/NSFP/NSFL Bilder nicht immer angezeigt werden.<br>
-        Mehr info <a href="https://github.com/ReneHollander/rep0st/issues/37">hier</a>.
-    </div>
     <div class="search-results">
         {% for search_result in search_results %}
         <a target="_blank" href="https://pr0gramm.com/new/{{search_result.post.id}}">

@@ -153,12 +153,6 @@ main {
     color: #fc8833;
 }
 
-.issue-notification {
-    background-color: #d9534f;
-    padding: 8px;
-    margin: 2px 2px 8px;
-}
-
 .search-results {
     width: 100%;
     display: grid;

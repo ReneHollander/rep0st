@@ -15,8 +15,8 @@ log = logging.getLogger(__name__)
 
 FLAGS = flags.FLAGS
 flags.DEFINE_integer(
-  'rep0st_fix_media_files_and_links_job_startid', None,
-  'Start iterating posts from the pr0gramm at the given post id.')
+    'rep0st_fix_media_files_and_links_job_startid', None,
+    'Start iterating posts from the pr0gramm at the given post id.')
 
 
 class FixMediaFilesAndLinksJobModule(Module):

@@ -15,6 +15,7 @@ from rep0st.framework.data.transaction import transactional
 
 log = logging.getLogger(__name__)
 
+
 class PostRepositoryModule(Module):
 
   def configure(self, binder):

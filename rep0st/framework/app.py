@@ -12,7 +12,7 @@ from typing import List, Any, Callable
 
 from prometheus_client import Info
 
-from rep0st.framework import get_bindings
+from rep0st.framework import Environment, EnvironmentModule, get_bindings
 from rep0st.framework.decorator import DecoratorProcessorModule, DecoratorProcessorRunner
 from rep0st.framework.execute import ExecuteModule, ExecuteProcessor
 from rep0st.framework.signal_handler import SignalHandlerModule
@@ -156,11 +156,15 @@ def _post_absl(modules_func: Callable[[], List[Any]]):
 
     try:
       modules = modules_func()
+      modules.insert(0, EnvironmentModule)
       modules.insert(0, DecoratorProcessorModule)
       modules.insert(0, SignalHandlerModule)
       modules.insert(0, ExecuteModule)
       modules.insert(0, MetriczPageModule)
       injector = Injector(modules=modules, auto_bind=False)
+
+      env = injector.get(Environment)
+      log.info(f'Application running with environment {env.name}')
 
       bindings = get_bindings(injector)
       for binding in bindings:

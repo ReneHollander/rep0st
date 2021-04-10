@@ -1,4 +1,5 @@
 import enum
+import logging
 from itertools import groupby
 from typing import List, Optional
 
@@ -12,6 +13,7 @@ from rep0st.db.feature import Feature
 from rep0st.framework.data.repository import Repository
 from rep0st.framework.data.transaction import transactional
 
+log = logging.getLogger(__name__)
 
 class PostRepositoryModule(Module):
 
@@ -24,6 +26,7 @@ class Type(enum.Enum):
   IMAGE = 'IMAGE'
   ANIMATED = 'ANIMATED'
   VIDEO = 'VIDEO'
+  UNKNOWN = 'UNKNOWN'
 
 
 def post_type_from_media_path(path: str) -> Type:
@@ -35,8 +38,8 @@ def post_type_from_media_path(path: str) -> Type:
   elif ending in ['mp4', 'webm']:
     return Type.VIDEO
   else:
-    raise NotImplementedError(
-        "Could not deduce post type from {} with ending {}", path, ending)
+    log.error(f'Could not deduce post type from {path} with ending {ending}')
+    return Type.UNKNOWN
 
 
 class Flag(enum.Enum):

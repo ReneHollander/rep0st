@@ -1,6 +1,7 @@
 import logging
 from typing import Any, List
 
+from absl import flags
 from injector import Binder, Module, inject, singleton
 
 from rep0st.db.post import Post, PostRepository, PostRepositoryModule
@@ -11,6 +12,11 @@ from rep0st.pr0gramm.api import Pr0grammAPI, Pr0grammAPIModule
 from rep0st.service.download_media_service import DownloadMediaService, DownloadMediaServiceModule
 
 log = logging.getLogger(__name__)
+
+FLAGS = flags.FLAGS
+flags.DEFINE_integer(
+  'rep0st_fix_media_files_and_links_job_startid', None,
+  'Start iterating posts from the pr0gramm at the given post id.')
 
 
 class FixMediaFilesAndLinksJobModule(Module):
@@ -42,7 +48,11 @@ class FixMediaFilesAndLinksJob:
 
   @execute()
   def fix_posts_job(self):
-    for post in self.api.iterate_posts(start=0):
+    startid = 0
+    if FLAGS.rep0st_fix_media_files_and_links_job_startid:
+      startid = FLAGS.rep0st_fix_media_files_and_links_job_startid
+
+    for post in self.api.iterate_posts(start=startid):
       try:
         log.info(f'Fixing post {post.id}')
         self.fix_post(post)

@@ -81,8 +81,11 @@ class WSGILogger(object):
     start = time.time()
     status = ""
     content_length = 0
+    remote = f"{environ['REMOTE_ADDR']}:{environ['REMOTE_PORT']}"
+    if 'HTTP_X_FORWARDED_FOR' in environ:
+      remote = f"{environ['HTTP_X_FORWARDED_FOR']} (through {remote})"
     request_logger.info(
-        f"{environ['REMOTE_ADDR']}:{environ['REMOTE_PORT']} - {environ['REQUEST_METHOD']} {environ['PATH_INFO']} {environ['SERVER_PROTOCOL']}"
+        f"{remote} - {environ['REQUEST_METHOD']} {environ['PATH_INFO']} {environ['SERVER_PROTOCOL']}"
     )
 
     def custom_start_response(status_, response_headers_, exc_info_=None):

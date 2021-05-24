@@ -44,6 +44,6 @@ class AnalyzeService:
       end = time.time()
       time_taken = end - start
       log.debug(
-          f'Analyzed image {image.shape} with analyzer {analyzer.get_type()} in {time_taken * 1000:.2f}'
+          f'Analyzed image {image.shape} with analyzer {analyzer.get_type()} in {time_taken * 1000:.2f}ms'
       )
     return result

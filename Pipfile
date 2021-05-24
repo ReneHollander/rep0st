@@ -24,6 +24,7 @@ cheroot = "*"
 jinja2 = "*"
 werkzeug = "*"
 opencv-contrib-python-headless = "*"
+ffmpeg-python = "*"
 
 [requires]
 python_version = "3.9"

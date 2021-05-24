@@ -7,12 +7,16 @@ from injector import Binder, Module, inject, singleton
 from rep0st.framework import app
 from rep0st.framework.scheduler import Scheduler, SchedulerModule
 from rep0st.service.feature_service import FeatureService, FeatureServiceModule
+from rep0st.db.post import Type as PostType
 
 log = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
 flags.DEFINE_string(
     'rep0st_update_features_job_schedule', '* * * * * *',
     'Schedule in crontab format for running the feature update job.')
+flags.DEFINE_enum_class(
+    'rep0st_update_features_post_type', PostType.IMAGE, PostType,
+    'The post type (image, video, ...) this job should index.')
 
 
 class UpdateFeaturesJobModule(Module):
@@ -34,7 +38,7 @@ class UpdateFeaturesJob:
                        self.update_feature_job)
 
   def update_feature_job(self):
-    self.feature_service.update_features()
+    self.feature_service.update_features(FLAGS.rep0st_update_features_post_type)
 
 
 def modules() -> List[Any]:

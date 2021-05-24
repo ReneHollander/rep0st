@@ -50,12 +50,15 @@ class Test:
 
   @execute()
   def test_main(self):
-    pass
+    # self.post_service.update_posts()
     # self.post_service.update_all_posts()
     # post_status_type_deleted_index.create()
     # print(self.post_repository.get_posts_missing_features(type=PostType.IMAGE))
     # self.post_index.init()  # self.post_index.
     # self.feature_service.backfill_features()
+    p = self.post_repository.get_by_id(4580667).one()
+    self.feature_service.add_features_to_posts([p])
+    print(p.features)
 
 
 def modules() -> List[Any]:

@@ -128,11 +128,12 @@ class FeatureService:
             work_post.post.features.append(feature)
 
   @transactional()
-  def _process_features(self,
-                        parallel: Optional[Parallel] = None
-                       ) -> Optional[Tuple[int, int]]:
+  def _process_features(
+      self,
+      post_type: PostType,
+      parallel: Optional[Parallel] = None) -> Optional[Tuple[int, int]]:
     posts = self.post_repository.get_posts_missing_features(
-        type=PostType.IMAGE).limit(1000).all()
+        type=post_type).limit(250).all()
     if len(posts) == 0:
       return None
     log.debug(f'Calculating features for {len(posts)} posts')
@@ -141,23 +142,25 @@ class FeatureService:
     log.debug(
         f'Saving {feature_count} features for {len(posts)} posts to database')
     self.post_repository.persist_all(posts)
-    log.debug(
-        f'Saving {feature_count} features for {len(posts)} posts to elasticsearch'
-    )
-    self.post_index.add_posts(posts)
+    # TODO(#34): Start adding video features to elasticsearch index
+    if post_type == PostType.IMAGE:
+      log.debug(
+          f'Saving {feature_count} features for {len(posts)} posts to elasticsearch'
+      )
+      self.post_index.add_posts(posts)
     feature_service_latest_processed_post_z.set(
         max(posts, key=lambda p: p.id).id)
     feature_service_features_added_z.inc(feature_count)
     log.info(f'Processed {feature_count} features')
     return len(posts), feature_count
 
-  def update_features(self):
-    log.info('Starting feature update')
+  def update_features(self, post_type: PostType):
+    log.info(f'Starting feature update for post type {post_type}')
     post_counter = 0
     feature_counter = 0
     with parallel_backend('threading'), Parallel() as parallel:
       while True:
-        result = self._process_features(parallel=parallel)
+        result = self._process_features(post_type, parallel=parallel)
         if result is None:
           break
         post_counter += result[0]

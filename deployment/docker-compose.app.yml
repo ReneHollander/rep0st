@@ -42,6 +42,25 @@ services:
     volumes:
       - media:/media:ro
 
+  update_video_features:
+    build:
+      context: ../
+      dockerfile: deployment/rep0st.Dockerfile
+    restart: always
+    command:
+      - rep0st.job.update_features_job
+      - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
+      - --rep0st_elasticsearch_uris=http://es01:9200
+      - --rep0st_media_path=/media/
+      - --rep0st_update_features_post_type=VIDEO
+    depends_on:
+      - mdb01
+      - es01
+    ports:
+      - 5003:5000
+    volumes:
+      - media:/media:ro
+
   web:
     build:
       context: ../

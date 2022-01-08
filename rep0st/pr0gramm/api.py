@@ -6,7 +6,7 @@ from typing import Iterator, NamedTuple, Optional
 from absl import flags
 from injector import Module, provider, singleton
 from prometheus_client import Counter
-from requests import RequestException, Response, Session
+from requests import RequestException, Response, Session, Timeout
 
 from rep0st.db.post import Post, Status, post_type_from_media_path
 from rep0st.db.tag import Tag
@@ -144,7 +144,7 @@ class Pr0grammAPI:
     error_count = 0
     while True:
       try:
-        response = self.session.get(url)
+        response = self.session.get(url, timeout=60)
         if response.status_code == 403:
           self.perform_login()
           continue
@@ -155,7 +155,7 @@ class Pr0grammAPI:
         response.raise_for_status()
         requests_z.labels(status=f'ok').inc()
         return response
-      except RequestException as e:
+      except (RequestException | Timeout) as e:
         log.exception(
             f'Error sending get request to {url}. Retrying in {3 ** error_count} seconds...'
         )

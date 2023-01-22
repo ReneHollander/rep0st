@@ -5,16 +5,16 @@ services:
     build:
       context: ./
       dockerfile: mariadb.Dockerfile
-    image: docker-registry.alb.zrh.internal.serv0r.xyz/rep0st-mariadb
+    image: docker-registry.internal.serv0r.xyz/rep0st-mariadb
 
   elasticsearch:
     build:
       context: ./
       dockerfile: elastiksearch.Dockerfile
-    image: docker-registry.alb.zrh.internal.serv0r.xyz/rep0st-elasticsearch
+    image: docker-registry.internal.serv0r.xyz/rep0st-elasticsearch
 
   app:
     build:
       context: ../
       dockerfile: deployment/rep0st.Dockerfile
-    image: docker-registry.alb.zrh.internal.serv0r.xyz/rep0st-app
+    image: docker-registry.internal.serv0r.xyz/rep0st-app

@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import BinaryIO, Callable, Dict, Iterable, NewType, Union, IO
 import numpy
 from absl import flags
-from cv2.cv2 import IMREAD_COLOR, imdecode, cvtColor, COLOR_RGB2BGR
+from cv2 import IMREAD_COLOR, imdecode, cvtColor, COLOR_RGB2BGR
 from injector import Binder, Module, inject, singleton
 import ffmpeg
 import subprocess

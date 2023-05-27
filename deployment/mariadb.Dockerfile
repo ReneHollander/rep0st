@@ -1,4 +1,4 @@
-FROM mariadb:10.5.9-focal
+FROM mariadb:10.11
 
 COPY --chmod=755 healthcheck/mariadb /usr/local/bin/docker-healthcheck
 HEALTHCHECK CMD ["docker-healthcheck"]

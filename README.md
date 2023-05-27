@@ -48,9 +48,9 @@ be terminated by sending a SIGINT.
 ```shell
 pipenv run python -m rep0st.job.update_posts_job \
   --environment=DEVELOPMENT \
-  --rep0st_database_uri=mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4 \
-  --pr0gramm_api_user=<your pr0gramm user> \
-  --pr0gramm_api_password=<your pr0gramm password> \
+  --rep0st_database_uri="mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4" \
+  --pr0gramm_api_user=${PR0GRAMM_API_USER?} \
+  --pr0gramm_api_password=${PR0GRAMM_API_PASSWORD?} \
   --rep0st_media_path=./data/ \
   --pr0gramm_api_limit_id_to=500 \
   --rep0st_update_posts_job_schedule=oneshot
@@ -64,7 +64,7 @@ be terminated by sending a SIGINT.
 ```shell
 pipenv run python -m rep0st.job.update_features_job \
   --environment=DEVELOPMENT \
-  --rep0st_database_uri=mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4 \
+  --rep0st_database_uri="mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4" \
   --rep0st_media_path=./data/ \
   --rep0st_update_features_job_schedule=oneshot
 ```
@@ -74,7 +74,7 @@ This runs the user facing web application serving the page, API and processing l
 ```shell
 pipenv run python -m rep0st.web \
   --environment=DEVELOPMENT \
-  --rep0st_database_uri=mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4
+  --rep0st_database_uri="mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4"
 ```
 
 # Pull Requests

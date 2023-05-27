@@ -91,17 +91,17 @@ class DecodeMediaService:
       if not format:
         break
       if format != 'P6':
-        raise NotImplementedError(
+        raise ImageDecodeException(
             'frames returned by ffmpeg cannot be decoded due to an unsupported format'
         )
       width, height = [int(x) for x in _readline(proc.stdout).split(' ')]
       max_value = int(_readline(proc.stdout))
       if max_value != 255:
-        raise NotImplementedError(f'max_value has to be 255, it is {max_value}')
+        raise ImageDecodeException(f'max_value has to be 255, it is {max_value}')
 
       in_bytes = proc.stdout.read(width * height * 3)
       if not in_bytes:
-        raise BufferError('could not read the full frame')
+        raise ImageDecodeException('could not read the full frame')
       in_frame = numpy.frombuffer(in_bytes,
                                   numpy.uint8).reshape([height, width, 3])
       in_frame = cvtColor(in_frame, COLOR_RGB2BGR)
@@ -111,7 +111,7 @@ class DecodeMediaService:
 
     if retcode != 0:
       err = proc.stderr.read().decode('utf-8')
-      raise SyntaxError(err)
+      raise ImageDecodeException(err)
 
 
 class ReadMediaServiceModule(Module):

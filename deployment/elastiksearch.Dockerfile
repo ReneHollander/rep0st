@@ -1,6 +1,6 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:7.12.0
+FROM docker.elastic.co/elasticsearch/elasticsearch:8.8.0
 
-RUN elasticsearch-plugin install --batch https://github.com/alexklibisz/elastiknn/releases/download/7.12.0.0/elastiknn-7.12.0.0.zip
+RUN elasticsearch-plugin install --batch https://github.com/alexklibisz/elastiknn/releases/download/8.8.0.0/elastiknn-8.8.0.0.zip
 
 COPY --chmod=755 healthcheck/elasticsearch /usr/local/bin/docker-healthcheck
 HEALTHCHECK CMD ["docker-healthcheck"]

@@ -89,10 +89,13 @@ class PostIndex(Index[Post]):
                 'query': {
                     'elastiknn_nearest_neighbors': {
                         'field': 'frames.feature_vector',
-                        'vec': feature_vector,
+                        'vec': {
+                            'values': feature_vector,
+                        },
                         'model': 'lsh',
                         'similarity': 'l2',
-                        'candidates': 500
+                        'candidates': 500,
+                        'probes': 1,
                     },
                 },
             },

@@ -25,10 +25,10 @@ services:
     environment:
       - cluster.name=es-cluster
       - node.name=es01
-      - discovery.seed_hosts=es01
       - cluster.initial_master_nodes=es01
       - bootstrap.memory_lock=true
       - "ES_JAVA_OPTS=-Xms4096m -Xmx4096m"
+      - xpack.security.enabled=false
     ports:
       - 9200:9200
     ulimits:

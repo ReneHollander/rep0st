@@ -140,7 +140,9 @@ class Post(Base):
         'tags': [tag.tag for tag in self.tags],
         'frames': [{
             'id': key,
-            'features': {v.type: v.data for v in valuesiter}
+            'features': {
+                v.type: v.data for v in valuesiter
+            }
         } for key, valuesiter in groupby(
             sorted(self.features, key=feauture_key_func), key=feauture_key_func)
                   ],

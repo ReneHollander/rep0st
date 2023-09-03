@@ -97,7 +97,8 @@ class DecodeMediaService:
       width, height = [int(x) for x in _readline(proc.stdout).split(' ')]
       max_value = int(_readline(proc.stdout))
       if max_value != 255:
-        raise ImageDecodeException(f'max_value has to be 255, it is {max_value}')
+        raise ImageDecodeException(
+            f'max_value has to be 255, it is {max_value}')
 
       in_bytes = proc.stdout.read(width * height * 3)
       if not in_bytes:

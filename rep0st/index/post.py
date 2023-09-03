@@ -1,7 +1,7 @@
 from typing import Iterable, NamedTuple
 
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Date, Document, InnerDoc, Integer, Keyword, Nested
+from elasticsearch_dsl import Date, Document, InnerDoc, Integer, Keyword, Nested, Search
 from injector import Module, inject
 
 from rep0st.analyze.feature_vector_analyzer import TYPE_NAME as FEATURE_VECTOR_TYPE
@@ -23,6 +23,7 @@ class Frame(InnerDoc):
 
 
 class Post(Document):
+  id = Integer()
   created = Date()
   flags = Keyword()
   type = Keyword()
@@ -55,6 +56,7 @@ class PostIndex(Index[Post]):
   def _index_post_from_post(self, post: DBPost) -> Post:
     index_post = Post()
     index_post.meta.id = post.id
+    index_post.id = post.id
     index_post.created = post.created
     index_post.type = post.type.value
     index_post.flags = [flag.value for flag in post.get_flags()]
@@ -104,3 +106,9 @@ class PostIndex(Index[Post]):
 
     for post in response:
       yield SearchResult(post.meta.score, post.meta.id)
+
+  def get_post_with_highest_id(self):
+    s = Search(using=self.elasticsearch).extra(size=0)
+    s.aggs.metric('max_post_id', 'max', field='id')
+    res = s.execute()
+    return res.aggregations['max_post_id']['value']

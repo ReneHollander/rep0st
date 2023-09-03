@@ -1,10 +1,11 @@
 from injector import Module, ProviderOf, inject
-from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String
+from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String, func
 from sqlalchemy.orm import Session, relationship
 
 from rep0st.config.rep0st_database import Rep0stDatabaseModule
 from rep0st.db import Base
 from rep0st.framework.data.repository import CompoundKey, Repository
+from rep0st.framework.data.transaction import transactional
 
 
 class FeatureRepositoryModule(Module):

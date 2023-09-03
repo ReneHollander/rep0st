@@ -20,10 +20,22 @@ log = logging.getLogger(__name__)
 
 feature_service_features_added_z = Counter(
     'rep0st_feature_service_features_added',
-    'Number of features added to the index')
+    'Number of features added to the index.')
 feature_service_latest_processed_post_z = Gauge(
     'rep0st_feature_service_latest_processed_post',
-    'ID of the latest post where the feaures where processed')
+    'ID of the latest post where the features where processed.')
+feature_service_latest_post_with_features_in_database_z = Gauge(
+    'rep0st_feature_service_latest_post_with_features_in_database',
+    'ID of the latest post in the database.')
+feature_service_latest_post_with_features_in_index_z = Gauge(
+    'rep0st_feature_service_latest_post_with_features_in_index',
+    'ID of the latest post in the Elasticsearch index.')
+feature_service_post_count_with_features_in_database_z = Gauge(
+    'rep0st_feature_service_post_count_with_features_in_database',
+    'Number of posts with features in the database.')
+feature_service_post_count_with_features_in_index_z = Gauge(
+    'rep0st_feature_service_post_count_with_features_in_index',
+    'Number of posts with features in the Elasticsearch index.')
 
 
 class FeatureServiceModule(Module):
@@ -83,6 +95,14 @@ class FeatureService:
     self.feature_repository = feature_repository
     self.analyze_service = analyze_service
     self.post_index = post_index
+    feature_service_latest_post_with_features_in_database_z.set_function(
+        self.post_repository.get_latest_post_id_with_features)
+    feature_service_latest_post_with_features_in_index_z.set_function(
+        self.post_index.get_post_with_highest_id)
+    feature_service_post_count_with_features_in_database_z.set_function(
+        self.post_repository.post_count_with_features)
+    feature_service_post_count_with_features_in_index_z.set_function(
+        self.post_index.count)
 
   def _process_work_post(self, work_post: WorkPost) -> WorkPost:
     try:
@@ -170,10 +190,10 @@ class FeatureService:
         f'Finished updating features. {feature_counter} features for {post_counter} posts were added to the database'
     )
 
-  def backfill_features(self):
+  def backfill_features(self, post_type: PostType):
     log.info('Starting feature backfill')
     it = self.post_repository.query().filter(
-        and_(Post.status == Status.INDEXED, Post.type == PostType.IMAGE,
+        and_(Post.status == Status.INDEXED, Post.type == post_type,
              Post.deleted == False))
     it = it.yield_per(1000)
     it = util.iterator_every(

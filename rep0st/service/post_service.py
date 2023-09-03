@@ -15,10 +15,10 @@ log = logging.getLogger(__name__)
 post_service_posts_added_z = Counter('rep0st_post_service_posts_added',
                                      'Number of posts added to database')
 post_service_latest_post_id_z = Gauge(
-    'rep0st_post_service_latest_processed_post', 'ID of the latest post seen')
+    'rep0st_post_service_latest_processed_post', 'ID of the latest post seen.')
 post_service_latest_post_in_database_z = Gauge(
     'rep0st_post_service_latest_post_in_database',
-    'ID of the latest post in the database')
+    'ID of the latest post in the database.')
 
 
 class PostServiceModule(Module):

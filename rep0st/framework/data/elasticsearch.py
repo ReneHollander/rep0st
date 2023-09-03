@@ -2,7 +2,7 @@ import logging
 from typing import Generic, Iterable, List, Type, TypeVar
 
 from elasticsearch import Elasticsearch
-from elasticsearch.helpers import bulk
+from elasticsearch.helpers import bulk, BulkIndexError
 from elasticsearch_dsl import Float, Search
 from elasticsearch_dsl.query import Query
 from injector import Module, provider, singleton
@@ -66,10 +66,17 @@ class Index(Generic[K]):
       for value in values:
         yield value.to_dict(include_meta=True)
 
-    return bulk(self.elasticsearch, _it())
+    try:
+      return bulk(self.elasticsearch, _it())
+    except BulkIndexError as e:
+      raise BulkIndexError(
+          f"{len(e.errors)} document(s) failed to index: {e.errors}", e.errors)
 
   def search(self) -> Search:
     return self._k_type.search(using=self.elasticsearch)
+
+  def count(self) -> Search:
+    return self.search().count()
 
   def delete(self, value: K):
     return value.delete(using=self.elasticsearch)

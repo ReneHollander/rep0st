@@ -226,3 +226,17 @@ class PostRepository(Repository[int, Post]):
   def post_count(self) -> int:
     session = self._get_session()
     return session.query(func.count(Post.id)).scalar()
+
+  @transactional()
+  def get_latest_post_id_with_features(self) -> int:
+    session = self._get_session()
+    id = session.query(func.max(Post.id)).filter(
+        and_(Post.status == Status.INDEXED, Post.type == Type.IMAGE)).scalar()
+    return 0 if id is None else id
+
+  @transactional()
+  def post_count_with_features(self) -> int:
+    session = self._get_session()
+    id = session.query(func.count(Post.id)).filter(
+        and_(Post.status == Status.INDEXED, Post.type == Type.IMAGE)).scalar()
+    return 0 if id is None else id

@@ -14,6 +14,7 @@ from werkzeug import Request
 from werkzeug.exceptions import HTTPException, InternalServerError
 from werkzeug.middleware.dispatcher import DispatcherMiddleware
 from werkzeug.routing import Map, Rule
+from wsgiref.types import WSGIApplication, WSGIEnvironment, StartResponse
 
 from rep0st.framework.decorator import DecoratorProcessor
 from rep0st.framework.execute import execute
@@ -70,13 +71,13 @@ class RequestLocal(threading.local):
 request_data = RequestLocal()
 
 
-class WSGILogger(object):
-  app: Callable = None
+class WSGILogger(WSGIApplication):
+  app: WSGIApplication = None
 
-  def __init__(self, app: Callable):
+  def __init__(self, app: WSGIApplication):
     self.app = app
 
-  def __call__(self, environ, start_response):
+  def __call__(self, environ: WSGIEnvironment, start_response: StartResponse):
     request_data.start()
     start = time.time()
     status = ""
@@ -110,7 +111,7 @@ class WSGILogger(object):
 
 class MountPoint(NamedTuple):
   mount_path: str
-  app: Callable
+  app: WSGIApplication
 
 
 class WebApp(ABC):
@@ -144,14 +145,16 @@ class WebServer:
         for mount in app.get_mounts()
     }
 
-  def _handler(self, environ, start_response):
+  def _handler(self, environ: WSGIEnvironment, start_response: StartResponse):
     adapter = self.url_map.bind_to_environ(environ)
     try:
       rule, values = adapter.match(return_rule=True)
     except HTTPException as e:
       return e.get_response(environ)(environ, start_response)
 
-    def custom_start_response(status_, response_headers_, exc_info_=None):
+    def custom_start_response(status_,
+                              response_headers_,
+                              exc_info_=None) -> StartResponse:
       framework_webserver_endpoint_requests_z.labels(
           rule=rule.rule,
           method=environ['REQUEST_METHOD'],

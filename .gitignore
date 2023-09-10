@@ -3,3 +3,6 @@ __pycache__
 /.idea/
 /data/
 /secrets/
+/node_modules
+/.vscode/
+/rep0st/web/frontend/static

@@ -1,6 +1,7 @@
 /* General */
 
-html, body {
+html,
+body {
     margin: 0;
     padding: 0;
 }
@@ -15,7 +16,8 @@ body {
     font-family: sans-serif;
 }
 
-input, textarea {
+input,
+textarea {
     font-family: sans-serif;
     font-size: 14px;
     margin: 0;
@@ -36,7 +38,9 @@ input[type=file] {
     padding: 0;
 }
 
-input[type=file]::file-selector-button, input[type=file]::-webkit-file-upload-button, input[type="submit"] {
+input[type=file]::file-selector-button,
+input[type=file]::-webkit-file-upload-button,
+input[type="submit"] {
     font-weight: 600;
     color: #F5F7F6;
     background-color: #ee4d2e;
@@ -47,7 +51,8 @@ input[type=file]::file-selector-button, input[type=file]::-webkit-file-upload-bu
     margin: 0;
 }
 
-input[type=file]::file-selector-button, input[type=file]::-webkit-file-upload-button {
+input[type=file]::file-selector-button,
+input[type=file]::-webkit-file-upload-button {
     margin-right: 1em;
     height: 100%;
     padding: 0 1em 0 1em;
@@ -86,12 +91,12 @@ header {
     align-items: center;
 }
 
-.header-title > img {
+.header-title>img {
     width: 1em;
     height: 1em;
 }
 
-.header-title > div {
+.header-title>div {
     margin-left: 1rem;
     color: #fff;
     text-decoration: none;
@@ -101,7 +106,7 @@ header {
     margin-left: auto;
 }
 
-.header-links > a {
+.header-links>a {
     color: #888;
     text-decoration: none;
 }
@@ -121,29 +126,29 @@ main {
     flex-direction: column;
 }
 
-.search > div {
+.search>div {
     padding-top: 0.25em;
 }
 
-.search > div {
+.search>div {
     display: flex;
     align-items: center;
 }
 
-.search > div > label {
+.search>div>label {
     min-width: 90px;
 }
 
-.search > div > input {
+.search>div>input {
     max-width: 400px;
     width: 100%;
 }
 
-.search > div > input[type=file] {
+.search>div>input[type=file] {
     max-width: 410px;
 }
 
-.search > div > input[type="submit"] {
+.search>div>input[type="submit"] {
     max-width: 100px;
     width: 100%;
 }
@@ -172,7 +177,7 @@ main {
     height: 250px;
 }
 
-.search-result > span {
+.search-result>span {
     position: absolute;
     padding: 4px;
     top: 0;
@@ -181,7 +186,7 @@ main {
     font-size: 0.8em;
 }
 
-.search-result > img {
+.search-result>img {
     max-width: 100%;
     max-height: 100%;
 }

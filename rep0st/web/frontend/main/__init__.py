@@ -1,43 +1,92 @@
 import logging
-from typing import BinaryIO, Optional
+from pathlib import Path
+from typing import BinaryIO, NewType, Optional
 
+from absl import flags
+from injector import Module, provider, ProviderOf, inject, singleton
+import jinja2
+from jinja2 import FileSystemLoader, Template, select_autoescape
 import requests
-from injector import Module, ProviderOf, inject, singleton
 from werkzeug import Request, Response
 from werkzeug.routing import Rule
 
 from rep0st.db.post import PostRepository, PostRepositoryModule
+from rep0st.framework import Environment
+from rep0st.framework.app import COMMIT_SHA
 from rep0st.framework.data.transaction import transactional
 from rep0st.framework.web import endpoint, request_data
+from rep0st.framework.webpack import Webpack
 from rep0st.service.media_service import ImageDecodeException, NoMediaFoundException
 from rep0st.service.post_search_service import PostSearchService, PostSearchServiceModule
 from rep0st.web import MediaHelper
-from rep0st.web.templates import IndexTemplate
 
 log = logging.getLogger(__name__)
 
+MainTemplate = NewType('MainTemplate', Template)
 
-class SiteModule(Module):
+FLAGS = flags.FLAGS
+flags.DEFINE_string(
+    'google_analytics_measurement_id', None,
+    'When set, adds a GA snippet to all pages reporting statistics to the given measurement ID.'
+)
+
+
+class MainModule(Module):
 
   def configure(self, binder):
     binder.install(PostSearchServiceModule)
     binder.install(PostRepositoryModule)
-    binder.bind(Site)
+    binder.install(TemplateModule)
+    binder.bind(Main)
+
+
+class _TemplateEnvironment(jinja2.Environment):
+
+  def __init__(self, env: Environment, webpack: Webpack):
+    args = {}
+    args.update(auto_reload=False)
+    if env == Environment.DEVELOPMENT:
+      args.update(cache_size=0, auto_reload=True)
+
+    super(_TemplateEnvironment, self).__init__(
+        loader=FileSystemLoader(Path(__file__).parent.absolute()),
+        autoescape=select_autoescape(),
+        **args)
+    self.globals['WEBPACK'] = webpack
+    self.globals['FRAMEWORK_BUILD_INFO'] = {'git_sha': COMMIT_SHA}
+    if FLAGS.google_analytics_measurement_id:
+      self.globals['GA'] = {
+          'measurement_id': FLAGS.google_analytics_measurement_id
+      }
+
+
+class TemplateModule(Module):
+
+  @provider
+  @singleton
+  def provide_environment(self, env: Environment,
+                          webpack: Webpack) -> jinja2.Environment:
+    return _TemplateEnvironment(env, webpack)
+
+  @provider
+  def provide_main_template(self,
+                            environment: jinja2.Environment) -> MainTemplate:
+    return environment.get_template('main.html.j2')
 
 
 @singleton
-class Site(MediaHelper):
+class Main(MediaHelper):
   post_search_service: PostSearchService = None
   post_repository: PostRepository = None
-  index_template: ProviderOf[IndexTemplate] = None
+  main_template: ProviderOf[MainTemplate] = None
 
   @inject
   def __init__(self, post_search_service: PostSearchService,
                post_repository: PostRepository,
-               index_template: ProviderOf[IndexTemplate]):
+               main_template: ProviderOf[MainTemplate]):
     self.post_search_service = post_search_service
     self.post_repository = post_repository
-    self.index_template = index_template
+    self.main_template = main_template
 
   @transactional()
   def get_statistics(self):
@@ -45,7 +94,7 @@ class Site(MediaHelper):
 
   def render(self, status=200, **kwargs):
     return Response(
-        self.index_template.get().render(stats=self.get_statistics(), **kwargs),
+        self.main_template.get().render(stats=self.get_statistics(), **kwargs),
         status=status,
         mimetype='text/html')
 

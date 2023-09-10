@@ -5,19 +5,24 @@ ENV LC_ALL C.UTF-8
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONFAULTHANDLER 1
 
-RUN apt-get update && apt-get dist-upgrade -y
+RUN apt-get update && apt-get dist-upgrade -y && apt-get install -y ffmpeg
 
 FROM base AS python-deps
 
-RUN apt-get install -y gcc
+RUN apt-get install -y gcc nodejs npm
 
 RUN pip install pipenv
 COPY Pipfile* /
 RUN PIPENV_VENV_IN_PROJECT=1 pipenv install --deploy
 
-FROM base AS runtime
+COPY package* /
+RUN npm install
 
-RUN apt-get install -y ffmpeg
+COPY rep0st /rep0st/
+COPY webpack.config.js /
+RUN npm run build
+
+FROM base AS runtime
 
 COPY --from=python-deps /.venv /.venv
 ENV PATH="/.venv/bin:$PATH"
@@ -25,7 +30,7 @@ ENV PATH="/.venv/bin:$PATH"
 COPY --chmod=755 deployment/healthcheck/rep0st /usr/local/bin/docker-healthcheck
 HEALTHCHECK CMD ["docker-healthcheck"]
 
-COPY rep0st /rep0st/
+COPY --from=python-deps /rep0st/ /rep0st/
 WORKDIR /
 ENTRYPOINT ["python", "-m"]
 

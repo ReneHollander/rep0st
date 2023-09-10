@@ -2,7 +2,6 @@ import logging
 from pathlib import Path
 from typing import BinaryIO, NewType, Optional
 
-from absl import flags
 from injector import Module, provider, ProviderOf, inject, singleton
 import jinja2
 from jinja2 import FileSystemLoader, Template, select_autoescape
@@ -23,12 +22,6 @@ from rep0st.web import MediaHelper
 log = logging.getLogger(__name__)
 
 MainTemplate = NewType('MainTemplate', Template)
-
-FLAGS = flags.FLAGS
-flags.DEFINE_string(
-    'google_analytics_measurement_id', None,
-    'When set, adds a GA snippet to all pages reporting statistics to the given measurement ID.'
-)
 
 
 class MainModule(Module):
@@ -54,10 +47,6 @@ class _TemplateEnvironment(jinja2.Environment):
         **args)
     self.globals['WEBPACK'] = webpack
     self.globals['FRAMEWORK_BUILD_INFO'] = {'git_sha': COMMIT_SHA}
-    if FLAGS.google_analytics_measurement_id:
-      self.globals['GA'] = {
-          'measurement_id': FLAGS.google_analytics_measurement_id
-      }
 
 
 class TemplateModule(Module):

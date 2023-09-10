@@ -8,16 +8,6 @@
     <link rel="shortcut icon" type="image/png" href="{{ WEBPACK['logo.png'] }}" />
     <link href="{{ WEBPACK['main.css'] }}" rel="stylesheet" type="text/css">
     <script src="{{ WEBPACK['main.js'] }}"></script>
-
-    {% if GA %}
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GA.measurement_id }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', '{{ GA.measurement_id }}');
-    </script>
-    {% endif %}
 </head>
 
 <body>

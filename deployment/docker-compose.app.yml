@@ -34,6 +34,7 @@ services:
       - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
       - --rep0st_elasticsearch_uris=http://es01:9200
       - --rep0st_media_path=/media/
+      - --rep0st_update_features_post_type=IMAGE
     depends_on:
       - mdb01
       - es01

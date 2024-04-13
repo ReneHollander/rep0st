@@ -48,6 +48,7 @@ class Flag(enum.Enum):
   NSFW = 'nsfw'
   NSFL = 'nsfl'
   NSFP = 'nsfp'
+  POL = 'pol'
 
 
 class Status(enum.Enum):
@@ -92,6 +93,7 @@ class Post(Base):
   # Bit 1: NSFW
   # Bit 2: NSFL
   # Bit 3: NSFP
+  # Bit 4: POL
   flags = Column(Integer(), nullable=False)
   # Name of the user that uploaded the post.
   user = Column(String(32), nullable=False)
@@ -118,6 +120,7 @@ class Post(Base):
         'is_sfw': self.is_sfw(),
         'is_nsfw': self.is_nsfw(),
         'is_nsfl': self.is_nsfl(),
+        'is_pol': self.is_pol(),
         'image': self.image,
         'thumb': self.thumb,
         'fullsize': self.fullsize,
@@ -160,6 +163,9 @@ class Post(Base):
   def is_nsfp(self):
     return self.flags & 8 != 0
 
+  def is_pol(self):
+    return self.flags & 16 != 0
+
   def get_flags(self) -> List[Flag]:
     flags = []
     if self.is_sfw():
@@ -170,6 +176,8 @@ class Post(Base):
       flags.append(Flag.NSFL)
     if self.is_nsfp():
       flags.append(Flag.NSFP)
+    if self.is_pol():
+      flags.append(Flag.POL)
     return flags
 
   def get_flag_by_importance(self) -> Flag:
@@ -179,6 +187,8 @@ class Post(Base):
       return Flag.NSFW
     if self.is_nsfp():
       return Flag.NSFP
+    if self.is_pol():
+      return Flag.POL
     return Flag.SFW
 
   def __str__(self):

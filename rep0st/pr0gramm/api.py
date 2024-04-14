@@ -174,7 +174,8 @@ class Pr0grammAPI:
 
     while not at_start:
       data = self.perform_request(
-          f'{self.baseurl_api}/items/get?flags=31&promoted=0&newer={start}').json()
+          f'{self.baseurl_api}/items/get?flags=31&promoted=0&newer={start}'
+      ).json()
       at_start = data['atStart']
 
       for item in data.get('items', ()):

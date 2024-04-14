@@ -5,7 +5,7 @@ from typing import List, Optional
 
 from injector import Module, ProviderOf, inject
 from sqlalchemy import Boolean, Column, DateTime, Enum, Index, Integer, String, and_, func
-from sqlalchemy.orm import Session, relationship
+from sqlalchemy.orm import Query, Session, relationship
 
 from rep0st.config.rep0st_database import Rep0stDatabaseModule
 from rep0st.db import Base
@@ -216,7 +216,7 @@ class PostRepository(Repository[int, Post]):
     return 0 if id is None else id
 
   @transactional()
-  def get_posts(self, type: Optional[str] = None):
+  def get_posts(self, type: Optional[str] = None) -> Query[Post]:
     session = self._get_session()
     if type is not None:
       return session.query(Post).filter(Post.type == type)

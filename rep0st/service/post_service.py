@@ -3,6 +3,7 @@ import logging
 from injector import Binder, Module, inject, singleton
 from prometheus_client import Counter
 from prometheus_client.metrics import Gauge
+from sqlalchemy import and_
 
 from rep0st import util
 from rep0st.db.post import Post, PostRepository, PostRepositoryModule, Status
@@ -46,18 +47,20 @@ class PostService:
     post_service_latest_post_in_database_z.set_function(
         self.post_repository.get_latest_post_id)
 
+  def _download_media(self, post: Post):
+    log.debug(f'Downloading media for post {post.id}')
+    try:
+      self.download_media_service.download_media(post)
+      post.status = Status.NOT_INDEXED
+    except DownloadMediaException:
+      post.status = Status.NO_MEDIA_FOUND
+      log.exception(f'Error downloading media for post {post.id}')
+
   @transactional()
   def _process_posts(self, posts) -> None:
     log.debug(f'Processing {len(posts)} posts')
     for post in posts:
-      log.debug(f'Downloading media for post {post.id}')
-      try:
-        self.download_media_service.download_media(post)
-        post.status = Status.NOT_INDEXED
-      except DownloadMediaException:
-        post.status = Status.NO_MEDIA_FOUND
-        log.exception(f'Error downloading media for post {post.id}')
-        continue
+      self._download_media(post)
     log.debug(f'Saving {len(posts)} posts to database')
     self.post_repository.persist_all(posts)
     post_service_posts_added_z.inc(len(posts))
@@ -76,20 +79,57 @@ class PostService:
         f'Finished updating posts. {counter} posts were added to the database')
 
   @transactional()
-  def _mark_deleted(self, ids):
-    count = self.post_repository.get_by_ids(ids).update(
-        {Post.deleted: True}, synchronize_session=False)
-    if count > 0:
-      log.info(f'Marked {count} posts as deleted')
+  def _process_batch(self, batch_start_id: int, batch_end_id: int,
+                     posts_from_api: list[dict[int, Post | None]]):
+    log.info(f'Processing posts {batch_start_id}-{batch_end_id}')
+    posts_from_db = {
+        p.id: p for p in self.post_repository.get_posts().filter(
+            and_(Post.id >= batch_start_id, Post.id <= batch_end_id))
+    }
+    to_save = []
+    for i in range(batch_start_id, batch_end_id + 1):
+      post_from_db = posts_from_db.get(i, None)
+      post_from_api = posts_from_api.get(i, None)
+      if post_from_api and not post_from_db:
+        # Post returned by API, but is not in DB.
+        log.debug(f'Adding missing post: {post_from_api}')
+        self._download_media(post_from_api)
+        to_save.append(post_from_api)
+        continue
+      if not post_from_db:
+        # We never saw this post and it doesn't exist. Nothing we can do to bring it back :(
+        log.debug(f'Ignoring post with id {i} since we never saw it')
+        continue
+      if not post_from_api:
+        # Post not returned by API, but it is in DB.
+        # Mark as deleted.
+        if not post_from_db.deleted:
+          log.debug(
+              f'Marking post deleted since it is no longer in the API: {post_from_db}'
+          )
+          post_from_db.deleted = True
+          to_save.append(post_from_db)
+        continue
+      # Post is in both DB and API. Potentially update it.
+      dirty = False
+      if post_from_db.deleted:
+        log.debug(
+            f'Unmarking post as deleted since the API contains it: {post_from_db}'
+        )
+        post_from_db.deleted = False
+        dirty = True
+      if post_from_db.flags != post_from_api.flags:
+        log.debug(
+            f'Updating flags of post since they changed: {post_from_db}. post_from_db.flags={post_from_db.flags}, post_from_api.flags={post_from_api.flags}'
+        )
+        post_from_db.flags = post_from_api.flags
+        dirty = True
+      if dirty:
+        to_save.append(post_from_db)
+    # TODO(https://github.com/ReneHollander/rep0st/issues/42): Sync updates posts to elasticsearch index.
+    self.post_repository.persist_all(to_save)
 
   def update_all_posts(self):
-    last_id = 0
-    to_mark_deleted = []
-    for post in self.api.iterate_posts():
-      if post.id != last_id + 1:
-        to_mark_deleted += list(range(last_id + 1, post.id))
-        if len(to_mark_deleted) > 100:
-          self._mark_deleted(to_mark_deleted)
-          to_mark_deleted = []
-
-      last_id = post.id
+    for batch_start_id, batch_end_id, posts_from_api in util.batch_by_index(
+        self.api.iterate_posts(), 1, 1000, lambda p: p.id):
+      self._process_batch(batch_start_id, batch_end_id, posts_from_api)

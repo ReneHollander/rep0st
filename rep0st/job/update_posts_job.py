@@ -36,7 +36,7 @@ class UpdatePostsJob:
     scheduler.schedule(FLAGS.rep0st_update_posts_job_schedule,
                        self.update_posts_job)
     scheduler.schedule(FLAGS.rep0st_update_all_posts_job_schedule,
-                       self.update_posts_job)
+                       self.update_all_posts_job)
 
   def update_posts_job(self):
     self.post_service.update_posts()

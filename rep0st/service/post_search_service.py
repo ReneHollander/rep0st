@@ -50,10 +50,23 @@ class PostSearchService:
         float(n / 255.0)
         for n in self.analyze_service.analyze(image)[FEATURE_VECTOR_TYPE]
     ]
-    search_results = self.post_index.find_posts(feature)
 
-    return [
-        SearchResult(result.score,
-                     self.post_repository.get_by_id(result.id).one())
-        for result in search_results
-    ]
+    results_from_index = self.post_index.find_posts(feature)
+    results_from_index = {
+        int(result_from_index.id): result_from_index
+        for result_from_index in results_from_index
+    }
+    results_from_db = list(
+        self.post_repository.get_by_ids(
+            results_from_index.keys()).filter(Post.deleted == False))
+
+    print(results_from_index)
+    print(results_from_db)
+
+    search_results = []
+    for result_from_db in results_from_db:
+      result_from_index = results_from_index[result_from_db.id]
+      search_results.append(
+          SearchResult(result_from_index.score, result_from_db))
+
+    return sorted(search_results, key=lambda sr: sr.score, reverse=True)

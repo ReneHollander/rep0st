@@ -1,10 +1,14 @@
+import logging
 from typing import Any, Collection, Generic, NamedTuple, Type, TypeVar
 
 from injector import ProviderOf
-from sqlalchemy import func, inspect
+from sqlalchemy import func, Index, inspect
 from sqlalchemy.orm import Query, Session
 
 from rep0st.framework.data.transaction import transactional
+from rep0st.framework.execute import execute
+
+log = logging.getLogger(__name__)
 
 K = TypeVar('K')
 V = TypeVar('V')
@@ -25,6 +29,8 @@ def _get_filter_from_comound_key(key: CompoundKey) -> dict[str, Any]:
 class Repository(Generic[K, V]):
   session_provider: ProviderOf[Session] = None
 
+  indices: list[Index] = None
+
   def __init__(self, k_type: Type[K], v_type: Type[V],
                session_provider: ProviderOf[Session]) -> None:
     self._k_type = k_type
@@ -33,6 +39,15 @@ class Repository(Generic[K, V]):
 
   def _get_session(self) -> Session:
     return self.session_provider.get()
+
+  @execute(-1000)
+  @transactional()
+  def initialize_indices(self):
+    session = self._get_session()
+    for index in self.indices:
+      log.debug('Creating index %s for repository %s.%s', index,
+                self.__class__.__module__, self.__class__.__name__)
+      index.create(bind=session.connection(), checkfirst=True)
 
   @transactional()
   def add(self, value: V) -> V:

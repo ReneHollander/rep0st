@@ -198,12 +198,13 @@ class Post(Base):
     return "Post(id=" + str(self.id) + ")"
 
 
-# Index on status, type and deleted for fast missing feature lookups.
-post_status_type_deleted_index = Index('post_status_type_deleted_index',
-                                       Post.status, Post.type, Post.deleted)
-
-
 class PostRepository(Repository[int, Post]):
+
+  indices = [
+      # Index on status, type and deleted for fast missing feature lookups.
+      Index('post_status_type_deleted_index', Post.status, Post.type,
+            Post.deleted),
+  ]
 
   @inject
   def __init__(self, session_provider: ProviderOf[Session]) -> None:

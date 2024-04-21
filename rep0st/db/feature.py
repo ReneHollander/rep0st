@@ -1,5 +1,5 @@
 from injector import Module, ProviderOf, inject
-from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, String, func
+from sqlalchemy import Column, ForeignKey, Index, Integer, LargeBinary, String
 from sqlalchemy.orm import Session, relationship
 
 from rep0st.config.rep0st_database import Rep0stDatabaseModule
@@ -43,6 +43,10 @@ class FeatureKey(CompoundKey):
 
 
 class FeatureRepository(Repository[FeatureKey, Feature]):
+
+  indices = [
+      Index('feature_post_id_type_index', Feature.post_id, Feature.type),
+  ]
 
   @inject
   def __init__(self, session_provider: ProviderOf[Session]) -> None:

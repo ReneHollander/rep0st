@@ -192,6 +192,7 @@ class WebServer:
     log.info('Shutting down webserver')
     if self.server:
       self.server.stop()
+    log.info('Successfully shut down webserver')
 
 
 class _EndpointConfiguration(NamedTuple):

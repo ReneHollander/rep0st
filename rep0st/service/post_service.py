@@ -111,21 +111,19 @@ class PostService:
           to_save.append(post_from_db)
         continue
       # Post is in both DB and API. Potentially update it.
-      dirty = False
       if post_from_db.deleted:
         log.debug(
             f'Unmarking post as deleted since the API contains it: {post_from_db}'
         )
         post_from_db.deleted = False
-        dirty = True
       if post_from_db.flags != post_from_api.flags:
         log.debug(
             f'Updating flags of post since they changed: {post_from_db}. post_from_db.flags={post_from_db.flags}, post_from_api.flags={post_from_api.flags}'
         )
         post_from_db.flags = post_from_api.flags
-        dirty = True
-      if dirty:
-        to_save.append(post_from_db)
+      # Download media if not exists or broken.
+      self._download_media(post_from_db)
+      to_save.append(post_from_db)
     # TODO(https://github.com/ReneHollander/rep0st/issues/42): Sync updates posts to elasticsearch index.
     self.post_repository.persist_all(to_save)
 

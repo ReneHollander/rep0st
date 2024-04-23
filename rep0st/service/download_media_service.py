@@ -4,7 +4,7 @@ from pathlib import Path
 from injector import Binder, Module, inject, singleton
 from prometheus_client import Counter
 
-from rep0st.db.post import Post, Type
+from rep0st.db.post import Post, Status, Type
 from rep0st.pr0gramm.api import APIException, Pr0grammAPI, Pr0grammAPIModule
 from rep0st.service.media_service import _MediaDirectory, _MediaFlagModule
 
@@ -44,7 +44,7 @@ class DownloadMediaService:
 
     def _download_media(path: str, dl_fn, dir_prefix: str = ''):
       media_file = self.media_dir / dir_prefix / path
-      if media_file.is_file():
+      if media_file.is_file() and post.status != Status.MEDIA_BROKEN:
         log.debug(
             f'Media for post {post.id} found at location {media_file.absolute()}, skipping download'
         )

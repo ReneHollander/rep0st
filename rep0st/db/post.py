@@ -227,11 +227,12 @@ class PostRepository(Repository[int, Post]):
   @transactional()
   def get_posts_missing_features(self, type: Optional[Type] = None):
     session = self._get_session()
-    q = session.query(Post)
+    q = session.query(Post).join(Post.features, isouter=True)
     if type:
       q = q.filter(Post.type == type)
     return q.filter(
-        and_(Post.status == Status.NOT_INDEXED, Post.deleted == False))
+        and_(Post.status == Status.NOT_INDEXED, Post.deleted == False,
+             Feature.id == None))
 
   @transactional()
   def post_count(self) -> int:

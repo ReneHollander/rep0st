@@ -81,6 +81,9 @@ _formatters = {
 }
 flags.DEFINE_enum('logtype', 'default', _formatters.keys(),
                   'Select the logtype to use.')
+flags.DEFINE_enum('loglevel', 'DEBUG',
+                  logging.getLevelNamesMapping().keys(),
+                  'Select the loglevel to use.')
 
 
 class AppendExtra(logging.Filter):
@@ -91,7 +94,7 @@ class AppendExtra(logging.Filter):
     return True
 
 
-def setup_logging(logtype):
+def setup_logging(logtype, loglevel):
   logging.captureWarnings(True)
 
   def log_warning(message, category, filename, lineno, file=None, line=None):
@@ -102,7 +105,7 @@ def setup_logging(logtype):
 
   root = logging.getLogger()
   root.handlers = []
-  root.setLevel(logging.DEBUG)
+  root.setLevel(loglevel)
   handler = logging.StreamHandler(sys.stdout)
   handler.addFilter(AppendExtra())
   handler.setFormatter(_formatters[logtype])
@@ -114,10 +117,13 @@ def setup_logging(logtype):
 
 def setup():
   logtype = 'default'
+  loglevel = logging.DEBUG
   for arg in sys.argv[1:]:
     if arg.startswith('--logtype='):
       logtype = arg[10:]
-  setup_logging(logtype)
+    if arg.startswith('--loglevel='):
+      loglevel = arg[11:]
+  setup_logging(logtype, loglevel)
 
 
 setup()
@@ -152,7 +158,7 @@ def _post_absl(modules_func: Callable[[], List[Any]]):
 
   def main(argv: Any):
     """Stuff to setup after absl is run."""
-    setup_logging(FLAGS.logtype)
+    setup_logging(FLAGS.logtype, FLAGS.loglevel)
 
     try:
       modules = modules_func()

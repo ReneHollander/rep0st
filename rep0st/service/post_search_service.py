@@ -60,9 +60,6 @@ class PostSearchService:
         self.post_repository.get_by_ids(
             results_from_index.keys()).filter(Post.deleted == False))
 
-    print(results_from_index)
-    print(results_from_db)
-
     search_results = []
     for result_from_db in results_from_db:
       result_from_index = results_from_index[result_from_db.id]

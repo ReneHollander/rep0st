@@ -6,7 +6,7 @@ from prometheus_client.metrics import Gauge
 from sqlalchemy import and_
 
 from rep0st import util
-from rep0st.db.post import Post, PostRepository, PostRepositoryModule, Status
+from rep0st.db.post import Post, PostErrorStatus, PostRepository, PostRepositoryModule
 from rep0st.framework.data.transaction import transactional
 from rep0st.pr0gramm.api import Pr0grammAPI, Pr0grammAPIModule
 from rep0st.service.download_media_service import DownloadMediaException, DownloadMediaService, DownloadMediaServiceModule
@@ -51,9 +51,9 @@ class PostService:
     log.debug(f'Downloading media for post {post.id}')
     try:
       self.download_media_service.download_media(post)
-      post.status = Status.NOT_INDEXED
+      post.error_status = None
     except DownloadMediaException:
-      post.status = Status.NO_MEDIA_FOUND
+      post.error_status = PostErrorStatus.NO_MEDIA_FOUND
       log.exception(f'Error downloading media for post {post.id}')
 
   @transactional()

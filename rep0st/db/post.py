@@ -51,13 +51,7 @@ class Flag(enum.Enum):
   POL = 'pol'
 
 
-class Status(enum.Enum):
-  # No attempt to download the media has been made yet.
-  NO_MEDIA = 'NO_MEDIA'
-  # The image is downloaded, but not yet indexed.
-  NOT_INDEXED = 'NOT_INDEXED'
-  # The image has been indexed.
-  INDEXED = 'INDEXED'
+class PostErrorStatus(enum.Enum):
   # No media was found on pr0gramm servers.
   NO_MEDIA_FOUND = 'NO_MEDIA_FOUND'
   # The downloaded media cannot be read.
@@ -102,9 +96,8 @@ class Post(Base):
   # - ANIMATED: Animated images. (gif)
   # - VIDEO: Videos. (mp4, webm)
   type = Column(Enum(Type), nullable=False, index=True)
-  # Status of the post.
-  status = Column(
-      Enum(Status), nullable=False, index=True, default=Status.NO_MEDIA)
+  # Error status of the post.
+  error_status = Column(Enum(PostErrorStatus), nullable=True, index=True)
   # True if the post is deleted on pr0gramm.
   deleted = Column(Boolean(), nullable=False, default=False)
   # List of features associated with this post.
@@ -201,9 +194,9 @@ class Post(Base):
 class PostRepository(Repository[int, Post]):
 
   indices = [
-      # Index on status, type and deleted for fast missing feature lookups.
-      Index('post_status_type_deleted_index', Post.status, Post.type,
-            Post.deleted),
+      # Index on error_status, type and deleted for fast missing feature lookups.
+      Index('post_error_status_type_deleted_index', Post.error_status,
+            Post.type, Post.deleted),
   ]
 
   @inject
@@ -231,7 +224,7 @@ class PostRepository(Repository[int, Post]):
     if type:
       q = q.filter(Post.type == type)
     return q.filter(
-        and_(Post.status == Status.NOT_INDEXED, Post.deleted == False,
+        and_(Post.error_status == None, Post.deleted == False,
              Feature.id == None))
 
   @transactional()
@@ -242,13 +235,13 @@ class PostRepository(Repository[int, Post]):
   @transactional()
   def get_latest_post_id_with_features(self) -> int:
     session = self._get_session()
-    id = session.query(func.max(Post.id)).filter(
-        and_(Post.status == Status.INDEXED, Post.type == Type.IMAGE)).scalar()
+    id = session.query(func.max(Post.id)).join(Post.features).filter(
+        and_(Post.type == Type.IMAGE)).scalar()
     return 0 if id is None else id
 
   @transactional()
   def post_count_with_features(self) -> int:
     session = self._get_session()
-    id = session.query(func.count(Post.id)).filter(
-        and_(Post.status == Status.INDEXED, Post.type == Type.IMAGE)).scalar()
+    id = session.query(func.count(Post.id)).join(Post.features).filter(
+        and_(Post.type == Type.IMAGE)).scalar()
     return 0 if id is None else id

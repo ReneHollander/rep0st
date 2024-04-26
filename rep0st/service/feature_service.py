@@ -1,4 +1,5 @@
 import logging
+from multiprocessing import TimeoutError
 from typing import Dict, List, Optional, Tuple
 
 import numpy
@@ -10,7 +11,7 @@ from sqlalchemy import and_
 
 from rep0st import util
 from rep0st.db.feature import Feature, FeatureRepository, FeatureRepositoryModule
-from rep0st.db.post import Post, PostRepository, PostRepositoryModule, Status, Type as PostType
+from rep0st.db.post import Post, PostErrorStatus, PostRepository, PostRepositoryModule, Type as PostType
 from rep0st.framework.data.transaction import transactional
 from rep0st.index.post import PostIndex, PostIndexModule
 from rep0st.service.analyze_service import AnalyzeService, AnalyzeServiceModule
@@ -62,19 +63,21 @@ class WorkPost:
   post: Post = None  # Do not touch from other threads, only passed around for use in main thread again.
   id: int = None
   type: PostType = None
-  status: Status = None
+  error_status: PostErrorStatus = None
   image: str = None
   fullsize: str = None
   images: List[WorkImage] = []
+  done: bool = False
 
   def __init__(self, post: Post):
     self.post = post
     self.id = post.id
     self.type = post.type
-    self.status = post.status
+    self.error_status = post.error_status
     self.image = post.image
     self.fullsize = post.fullsize
     self.images = []
+    self.done = False
 
 
 @singleton
@@ -109,17 +112,18 @@ class FeatureService:
       for i, image in enumerate(self.read_media_service.get_images(work_post)):
         work_post.images.append(
             WorkImage(i, self.analyze_service.analyze(image)))
-      work_post.status = Status.INDEXED
+      work_post.error_status = None
     except NoMediaFoundException:
-      work_post.status = Status.NO_MEDIA_FOUND
+      work_post.error_status = PostErrorStatus.NO_MEDIA_FOUND
       log.exception(
           f'Error getting images for post {work_post.id}. No features are generated for it and post marked with NO_MEDIA_FOUND'
       )
     except ImageDecodeException:
-      work_post.status = Status.MEDIA_BROKEN
+      work_post.error_status = PostErrorStatus.MEDIA_BROKEN
       log.exception(
           f'Error getting images for post {work_post.id}. No features are generated for it and post marked with IMAGE_BROKEN'
       )
+    work_post.done = True
     return work_post
 
   def add_features_to_posts(self,
@@ -128,17 +132,25 @@ class FeatureService:
     work_posts = [WorkPost(post) for post in posts]
 
     if parallel:
-      work_posts = parallel(
-          delayed(self._process_work_post)(work_post)
-          for work_post in work_posts)
+      try:
+        parallel(
+            delayed(self._process_work_post)(work_post)
+            for work_post in work_posts)
+      except TimeoutError:
+        for work_post in work_posts:
+          if work_post.done == False:
+            log.warn(
+                f'Post {work_post.post} could not be processed within 120s. Marking MEDIA_BROKEN'
+            )
+            work_post.error_status = PostErrorStatus.MEDIA_BROKEN
     else:
       work_posts = [
           self._process_work_post(work_post) for work_post in work_posts
       ]
 
     for work_post in work_posts:
-      work_post.post.status = work_post.status
-      if work_post.post.status == Status.INDEXED:
+      work_post.post.error_status = work_post.error_status
+      if work_post.post.error_status == None:
         for image in work_post.images:
           for type, data in image.features.items():
             feature = Feature()
@@ -178,7 +190,7 @@ class FeatureService:
     log.info(f'Starting feature update for post type {post_type}')
     post_counter = 0
     feature_counter = 0
-    with parallel_backend('threading'), Parallel() as parallel:
+    with parallel_backend('threading'), Parallel(timeout=120.0) as parallel:
       while True:
         result = self._process_features(post_type, parallel=parallel)
         if result is None:
@@ -192,9 +204,8 @@ class FeatureService:
 
   def backfill_features(self, post_type: PostType):
     log.info('Starting feature backfill')
-    it = self.post_repository.query().filter(
-        and_(Post.status == Status.INDEXED, Post.type == post_type,
-             Post.deleted == False))
+    it = self.post_repository.query().join(Post.features).filter(
+        and_(Post.type == post_type, Post.deleted == False))
     it = it.yield_per(1000)
     it = util.iterator_every(
         it, every=10000, msg='Backfilled {current} features')

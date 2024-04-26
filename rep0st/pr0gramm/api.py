@@ -8,7 +8,7 @@ from injector import Module, provider, singleton
 from prometheus_client import Counter
 from requests import RequestException, Response, Session, Timeout
 
-from rep0st.db.post import Post, Status, post_type_from_media_path
+from rep0st.db.post import Post, PostErrorStatus, post_type_from_media_path
 from rep0st.db.tag import Tag
 from rep0st.util import get_secret
 
@@ -195,7 +195,6 @@ class Pr0grammAPI:
         post.flags = item['flags'] or None
         post.user = item['user'] or None
         post.type = post_type_from_media_path(item['image'])
-        post.status = Status.NO_MEDIA
         start = post.id
         yield post
 

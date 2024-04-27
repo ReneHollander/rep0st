@@ -1,20 +1,12 @@
-version: '3.9'
-
 services:
-  mariadb:
+  postgresql:
     build:
       context: ./
-      dockerfile: mariadb.Dockerfile
-    image: docker-registry.internal.serv0r.xyz/rep0st-mariadb
-
-  elasticsearch:
-    build:
-      context: ./
-      dockerfile: elastiksearch.Dockerfile
-    image: docker-registry.internal.serv0r.xyz/rep0st-elasticsearch
+      dockerfile: postgresql.Dockerfile
+    image: docker-registry.internal.serv0r.xyz/rep0st-postgresql:${TAG:-latest}
 
   app:
     build:
       context: ../
       dockerfile: deployment/rep0st.Dockerfile
-    image: docker-registry.internal.serv0r.xyz/rep0st-app
+    image: docker-registry.internal.serv0r.xyz/rep0st-app:${TAG:-latest}

@@ -8,7 +8,8 @@ from injector import Binder, Module, inject, singleton
 import ffmpeg
 import subprocess
 
-from rep0st.db.post import Post, Type
+from rep0st.db import PostType
+from rep0st.db.post import Post
 
 log = logging.getLogger(__name__)
 FLAGS = flags.FLAGS
@@ -135,7 +136,7 @@ class ImageDecodeException(Exception):
 class ReadMediaService:
   media_dir: Path
   decode_media_service: DecodeMediaService
-  decoders: Dict[Type, Callable[[Iterable[numpy.ndarray]], BinaryIO]]
+  decoders: Dict[PostType, Callable[[Iterable[numpy.ndarray]], BinaryIO]]
 
   @inject
   def __init__(self, media_dir: _MediaDirectory,
@@ -143,8 +144,8 @@ class ReadMediaService:
     self.media_dir = media_dir
     self.decode_media_service = decode_media_service
     self.decoders = {
-        Type.IMAGE: self.decode_media_service.decode_image_from_file,
-        Type.VIDEO: self.decode_media_service.decode_video_from_file,
+        PostType.IMAGE: self.decode_media_service.decode_image_from_file,
+        PostType.VIDEO: self.decode_media_service.decode_video_from_file,
     }
 
   def get_images(self, post: Post) -> Iterable[numpy.ndarray]:

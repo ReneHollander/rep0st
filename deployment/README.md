@@ -3,25 +3,30 @@
 **Note: Run all commands from the project root directory.**
 
 ## Only dependencies
-Starts services like MariaDB and Elasticsearch for developing locally
+
+Starts services like PostgreSQL for developing locally.
+
 ```shell
 docker-compose -p rep0st -f deployment/docker-compose.base.yml build
 docker-compose -p rep0st -f deployment/docker-compose.base.yml up -d
 ```
+
 Reach
-- MariaDB at `localhost:3306`
-- Elasticsearch at `localhost:9200`
+
+- PostgreSQL at `localhost:5432`
 
 ## Full application in development mode
-Starts the full application locally
+
+Starts the full application locally.
+
 ```shell
 docker-compose -p rep0st -f deployment/docker-compose.base.yml -f deployment/docker-compose.app.yml build
 docker-compose -p rep0st -f deployment/docker-compose.base.yml -f deployment/docker-compose.app.yml up -d
 ```
 
 Reach
-- MariaDB at `localhost:3306`
-- Elasticsearch at `localhost:9200`
+
+- PostgreSQL at `localhost:5432`
 - Post update job at `localhost:5001/metricz`
 - Feature update job at `localhost:5002/metricz`
 - Frontend at `localhost:5000` (`localhost:5000/metricz` for metrics)

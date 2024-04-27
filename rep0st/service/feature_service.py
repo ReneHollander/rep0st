@@ -1,19 +1,18 @@
 import logging
 from multiprocessing import TimeoutError
-from typing import Dict, List, Optional, Tuple
+from typing import List, Optional, Tuple
 
 import numpy
+from numpy.typing import NDArray
 from injector import Binder, Module, inject, singleton
 from joblib import Parallel, delayed, parallel_backend
 from prometheus_client import Counter
 from prometheus_client.metrics import Gauge
-from sqlalchemy import and_
 
-from rep0st import util
-from rep0st.db.feature import Feature, FeatureRepository, FeatureRepositoryModule
-from rep0st.db.post import Post, PostErrorStatus, PostRepository, PostRepositoryModule, Type as PostType
+from rep0st.db import PostType
+from rep0st.db.feature import FeatureVector, FeatureVectorRepository, FeatureVectorRepositoryModule
+from rep0st.db.post import Post, PostErrorStatus, PostRepository, PostRepositoryModule
 from rep0st.framework.data.transaction import transactional
-from rep0st.index.post import PostIndex, PostIndexModule
 from rep0st.service.analyze_service import AnalyzeService, AnalyzeServiceModule
 from rep0st.service.media_service import ImageDecodeException, NoMediaFoundException, ReadMediaService, ReadMediaServiceModule
 
@@ -28,35 +27,28 @@ feature_service_latest_processed_post_z = Gauge(
 feature_service_latest_post_with_features_in_database_z = Gauge(
     'rep0st_feature_service_latest_post_with_features_in_database',
     'ID of the latest post in the database.')
-feature_service_latest_post_with_features_in_index_z = Gauge(
-    'rep0st_feature_service_latest_post_with_features_in_index',
-    'ID of the latest post in the Elasticsearch index.')
 feature_service_post_count_with_features_in_database_z = Gauge(
     'rep0st_feature_service_post_count_with_features_in_database',
     'Number of posts with features in the database.')
-feature_service_post_count_with_features_in_index_z = Gauge(
-    'rep0st_feature_service_post_count_with_features_in_index',
-    'Number of posts with features in the Elasticsearch index.')
 
 
 class FeatureServiceModule(Module):
 
   def configure(self, binder: Binder):
     binder.install(PostRepositoryModule)
-    binder.install(FeatureRepositoryModule)
+    binder.install(FeatureVectorRepositoryModule)
     binder.install(AnalyzeServiceModule)
     binder.install(ReadMediaServiceModule)
-    binder.install(PostIndexModule)
     binder.bind(FeatureService)
 
 
 class WorkImage:
   id: int
-  features: Dict[str, numpy.ndarray]
+  feature_vector: NDArray[numpy.float32]
 
-  def __init__(self, id: int, features: Dict[str, numpy.ndarray]):
+  def __init__(self, id: int, feature_vector: NDArray[numpy.float32]):
     self.id = id
-    self.features = features
+    self.feature_vector = feature_vector
 
 
 class WorkPost:
@@ -86,28 +78,22 @@ class WorkPost:
 class FeatureService:
   read_media_service: ReadMediaService = None
   post_repository: PostRepository = None
-  feature_repository: FeatureRepository = None
+  feature_vector_repository: FeatureVectorRepository = None
   analyze_service: AnalyzeService = None
-  post_index: PostIndex = None
 
   @inject
   def __init__(self, read_media_service: ReadMediaService,
                post_repository: PostRepository,
-               feature_repository: FeatureRepository,
-               analyze_service: AnalyzeService, post_index: PostIndex):
+               feature_vector_repository: FeatureVectorRepository,
+               analyze_service: AnalyzeService):
     self.read_media_service = read_media_service
     self.post_repository = post_repository
-    self.feature_repository = feature_repository
+    self.feature_vector_repository = feature_vector_repository
     self.analyze_service = analyze_service
-    self.post_index = post_index
     feature_service_latest_post_with_features_in_database_z.set_function(
         self.post_repository.get_latest_post_id_with_features)
-    feature_service_latest_post_with_features_in_index_z.set_function(
-        self.post_index.get_post_with_highest_id)
     feature_service_post_count_with_features_in_database_z.set_function(
         self.post_repository.post_count_with_features)
-    feature_service_post_count_with_features_in_index_z.set_function(
-        self.post_index.count)
 
   def _process_work_post(self, work_post: WorkPost) -> WorkPost:
     work_post.started = True
@@ -128,9 +114,10 @@ class FeatureService:
       )
     work_post.done = True
 
-  def add_features_to_posts(self,
-                            posts: List[Post],
-                            parallel: Optional[Parallel] = None) -> None:
+  def add_features_to_posts(
+      self,
+      posts: List[Post],
+      parallel: Optional[Parallel] = None) -> List[FeatureVector]:
     work_posts = [WorkPost(post) for post in posts]
 
     if parallel:
@@ -144,6 +131,9 @@ class FeatureService:
       for work_post in work_posts:
         self._process_work_post(work_post)
 
+    log.debug(f'Calculated features for {len(posts)} posts')
+
+    feature_vectors = []
     for work_post in work_posts:
       work_post.post.error_status = work_post.error_status
       if work_post.started and not work_post.done:
@@ -153,40 +143,33 @@ class FeatureService:
         work_post.post.error_status = PostErrorStatus.MEDIA_BROKEN
       if work_post.post.error_status == None:
         for image in work_post.images:
-          for type, data in image.features.items():
-            feature = Feature()
-            feature.id = image.id
-            feature.type = type
-            feature.data = data
-            work_post.post.features.append(feature)
-            work_post.post.features_indexed = True
+          work_post.post.features_indexed = True
+          feature_vectors.append(
+              FeatureVector(
+                  post=work_post.post,
+                  id=image.id,
+                  post_type=work_post.type,
+                  vec=image.feature_vector))
+    return feature_vectors
 
-  @transactional()
+  @transactional(autoflush=False)
   def _process_features(
       self,
       post_type: PostType,
-      parallel: Optional[Parallel] = None) -> Optional[Tuple[int, int]]:
+      parallel: Optional[Parallel] = None) -> Tuple[int, int, int]:
     posts = self.post_repository.get_posts_missing_features(
-        type=post_type).limit(250).all()
+        type=post_type).limit(1000).all()
     if len(posts) == 0:
-      return None
+      return 0, 0, 0
     log.debug(f'Calculating features for {len(posts)} posts')
-    self.add_features_to_posts(posts, parallel=parallel)
-    feature_count = sum([len(post.features) for post in posts])
+    feature_vectors = self.add_features_to_posts(posts, parallel=parallel)
+    feature_count = len(feature_vectors)
     log.debug(
         f'Saving {feature_count} features for {len(posts)} posts to database')
-    self.post_repository.persist_all(posts)
-    # TODO(#34): Start adding video features to elasticsearch index
-    if post_type == PostType.IMAGE:
-      log.debug(
-          f'Saving {feature_count} features for {len(posts)} posts to elasticsearch'
-      )
-      self.post_index.add_posts(posts)
-    feature_service_latest_processed_post_z.set(
-        max(posts, key=lambda p: p.id).id)
-    feature_service_features_added_z.inc(feature_count)
-    log.info(f'Processed {feature_count} features')
-    return len(posts), feature_count
+    self.feature_vector_repository.add_all(feature_vectors)
+    self.post_repository.add_all(posts)
+    max_post_id = max(posts, key=lambda p: p.id).id
+    return len(posts), feature_count, max_post_id
 
   def update_features(self, post_type: PostType):
     log.info(f'Starting feature update for post type {post_type}')
@@ -194,23 +177,18 @@ class FeatureService:
     feature_counter = 0
     with parallel_backend('threading'), Parallel(timeout=120.0) as parallel:
       while True:
-        result = self._process_features(post_type, parallel=parallel)
-        if result is None:
+        post_count, feature_count, max_post_id = self._process_features(
+            post_type, parallel=parallel)
+        if post_count == 0:
           break
-        post_counter += result[0]
-        feature_counter += result[1]
+        feature_service_latest_processed_post_z.set(max_post_id)
+        feature_service_features_added_z.inc(feature_count)
+        log.info(
+            f'Processed {feature_count} features for {post_count} posts. Latest post: {max_post_id}'
+        )
+        post_counter += post_count
+        feature_counter += feature_count
 
     log.info(
         f'Finished updating features. {feature_counter} features for {post_counter} posts were added to the database'
     )
-
-  def backfill_features(self, post_type: PostType):
-    log.info('Starting feature backfill')
-    it = self.post_repository.query().filter(
-        and_(Post.type == post_type, Post.deleted == False,
-             Post.features_indexed == True))
-    it = it.yield_per(1000)
-    it = util.iterator_every(
-        it, every=10000, msg='Backfilled {current} features')
-    self.post_index.add_posts(it)
-    log.info('Finished backfilling features')

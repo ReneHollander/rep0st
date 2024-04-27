@@ -1,15 +1,17 @@
 import enum
 import logging
-from itertools import groupby
+import math
 from typing import List, Optional
 
 from injector import Module, ProviderOf, inject
-from sqlalchemy import Boolean, Column, DateTime, Enum, Index, Integer, String, and_, func
+import numpy
+from numpy.typing import NDArray
+from sqlalchemy import Boolean, Column, DateTime, Enum, Index, Integer, String, and_, func, text
 from sqlalchemy.orm import Query, Session, relationship
 
 from rep0st.config.rep0st_database import Rep0stDatabaseModule
-from rep0st.db import Base
-from rep0st.db.feature import Feature
+from rep0st.db import Base, PostType
+from rep0st.db.feature import FeatureVector
 from rep0st.framework.data.repository import Repository
 from rep0st.framework.data.transaction import transactional
 
@@ -23,24 +25,17 @@ class PostRepositoryModule(Module):
     binder.bind(PostRepository)
 
 
-class Type(enum.Enum):
-  IMAGE = 'IMAGE'
-  ANIMATED = 'ANIMATED'
-  VIDEO = 'VIDEO'
-  UNKNOWN = 'UNKNOWN'
-
-
-def post_type_from_media_path(path: str) -> Type:
+def post_type_from_media_path(path: str) -> PostType:
   ending = path[path.rfind('.') + 1:].lower()
   if ending in ['jpg', 'jpeg', 'png']:
-    return Type.IMAGE
+    return PostType.IMAGE
   elif ending in ['gif']:
-    return Type.ANIMATED
+    return PostType.ANIMATED
   elif ending in ['mp4', 'webm']:
-    return Type.VIDEO
+    return PostType.VIDEO
   else:
     log.error(f'Could not deduce post type from {path} with ending {ending}')
-    return Type.UNKNOWN
+    return PostType.UNKNOWN
 
 
 class Flag(enum.Enum):
@@ -59,7 +54,7 @@ class PostErrorStatus(enum.Enum):
 
 
 class Post(Base):
-  from rep0st.db.feature import Feature
+  from rep0st.db.feature import FeatureVector
   from rep0st.db.tag import Tag
 
   __tablename__ = 'post'
@@ -90,18 +85,19 @@ class Post(Base):
   # Bit 4: POL
   flags = Column(Integer(), nullable=False)
   # Name of the user that uploaded the post.
-  user = Column(String(32), nullable=False)
+  username = Column(String(32), nullable=False)
   # Type of the media in the post.
   # - IMAGE: Static images. (jpg, png)
   # - ANIMATED: Animated images. (gif)
   # - VIDEO: Videos. (mp4, webm)
-  type = Column(Enum(Type), nullable=False, index=True)
+  type = Column(Enum(PostType), nullable=False, index=True)
   # Error status of the post.
   error_status = Column(Enum(PostErrorStatus), nullable=True, index=True)
   # True if the post is deleted on pr0gramm.
   deleted = Column(Boolean(), nullable=False, default=False)
   # List of features associated with this post.
-  features = relationship(Feature)
+  feature_vectors = relationship(
+      FeatureVector, cascade='save-update, merge, delete, delete-orphan')
   # True if features are indexed for this post.
   features_indexed = Column(
       Boolean(), nullable=False, index=True, default=False)
@@ -120,31 +116,6 @@ class Post(Base):
         'image': self.image,
         'thumb': self.thumb,
         'fullsize': self.fullsize,
-    }
-
-  def as_indexed_doc(self):
-
-    def feauture_key_func(feature: Feature):
-      return feature.id
-
-    return {
-        'meta': {
-            'id': self.id
-        },
-        'created':
-            int(self.created.timestamp() * 1000),
-        'flags': [flag.value for flag in self.get_flags()],
-        'type':
-            self.type.value,
-        'tags': [tag.tag for tag in self.tags],
-        'frames': [{
-            'id': key,
-            'features': {
-                v.type: v.data for v in valuesiter
-            }
-        } for key, valuesiter in groupby(
-            sorted(self.features, key=feauture_key_func), key=feauture_key_func)
-                  ],
     }
 
   def is_sfw(self):
@@ -221,14 +192,14 @@ class PostRepository(Repository[int, Post]):
       return session.query(Post)
 
   @transactional()
-  def get_posts_missing_features(self, type: Optional[Type] = None):
+  def get_posts_missing_features(self, type: Optional[PostType] = None):
     session = self._get_session()
     q = session.query(Post)
     if type:
       q = q.filter(Post.type == type)
     return q.filter(
         and_(Post.error_status == None, Post.deleted == False,
-             Post.features_indexed == False))
+             Post.features_indexed == False)).order_by(Post.id)
 
   @transactional()
   def post_count(self) -> int:
@@ -248,3 +219,25 @@ class PostRepository(Repository[int, Post]):
     id = session.query(func.count(Post.id)).filter(
         and_(Post.features_indexed == True)).scalar()
     return 0 if id is None else id
+
+  @transactional()
+  def search_posts(self,
+                   type: PostType,
+                   feature_vector: NDArray[numpy.float32],
+                   exact: bool | None = False,
+                   ef_search: int | None = None) -> Query[Post]:
+    session = self._get_session()
+    if exact:
+      session.connection().execute(text('SET enable_indexscan = off'))
+    if ef_search:
+      session.connection().execute(text(f'SET hnsw.ef_search = {ef_search}'))
+    return session.query(
+        # The largest distance between two feature_vectors can be sqrt(108),
+        # since each dimension has a value between 0..1.
+        # So to calculate similarity divide by the max value and then subtract
+        # from 1 to get a percentage similarity.
+        (1 - (FeatureVector.vec.l2_distance(feature_vector) / math.sqrt(108))
+        ).label('score'),
+        Post).join(Post.feature_vectors).filter(
+            FeatureVector.post_type == type).order_by(
+                FeatureVector.vec.l2_distance(feature_vector))

@@ -1,7 +1,6 @@
-FROM mariadb:10.11
+FROM paradedb/paradedb:0.6.1
 
-COPY --chmod=755 healthcheck/mariadb /usr/local/bin/docker-healthcheck
-HEALTHCHECK CMD ["docker-healthcheck"]
+HEALTHCHECK CMD ["pg_isready", "-U", "rep0st", "-d", "rep0st"]
 
 ARG BRANCH="no_branch"
 ARG COMMIT="no_commit"

@@ -1,53 +1,64 @@
 from injector import Module, ProviderOf, inject
-from sqlalchemy import Column, ForeignKey, Index, Integer, LargeBinary, String
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import Column, Enum, ForeignKey, Index, Integer
 from sqlalchemy.orm import Session, relationship
 
 from rep0st.config.rep0st_database import Rep0stDatabaseModule
-from rep0st.db import Base
+from rep0st.db import Base, PostType
 from rep0st.framework.data.repository import CompoundKey, Repository
-from rep0st.framework.data.transaction import transactional
 
 
-class FeatureRepositoryModule(Module):
+class FeatureVectorRepositoryModule(Module):
 
   def configure(self, binder):
     binder.install(Rep0stDatabaseModule)
-    binder.bind(FeatureRepository)
+    binder.bind(FeatureVectorRepository)
 
 
-class Feature(Base):
-  __tablename__ = 'feature'
+class FeatureVector(Base):
+  __tablename__ = 'feature_vector'
   post_id = Column(
       Integer,
       ForeignKey('post.id'),
       primary_key=True,
       index=True,
       autoincrement=False)
-  post = relationship('Post', back_populates='features')
-  type = Column(String(32), nullable=False, primary_key=True, index=True)
+  post = relationship('Post', back_populates='feature_vectors')
   id = Column(Integer, primary_key=True, index=True)
-  data = Column(LargeBinary)
+  # Same as post.type. Needed for better index.
+  post_type = Column(Enum(PostType), nullable=False, index=True)
+  vec = Column(Vector(108))
 
   def __str__(self):
-    return "Feature(post=%s, type=%s, data=%s)" % (self.post, self.type,
-                                                   self.data)
+    return "FeatureVector(post=%s, post_type=%s, vec=%s)" % (
+        self.post, self.post_type, self.vec)
 
   def __repr__(self):
-    return f"Feature(post_id={self.post_id}, type={self.type}, id={self.id})"
+    return f"FeatureVector(post_id={self.post_id}, post_type={self.post_type}, id={self.id})"
 
 
-class FeatureKey(CompoundKey):
+class FeatureVectorKey(CompoundKey):
   post_id: int
-  type: str
   id: int
+  post_type: PostType
 
 
-class FeatureRepository(Repository[FeatureKey, Feature]):
+class FeatureVectorRepository(Repository[FeatureVectorKey, FeatureVector]):
 
   indices = [
-      Index('feature_post_id_type_index', Feature.post_id, Feature.type),
+      Index(
+          'feature_vector_post_type_image_vec_approx',
+          FeatureVector.vec,
+          postgresql_using='hnsw',
+          postgresql_with={
+              'm': 16,
+              'ef_construction': 64
+          },
+          postgresql_ops={'vec': 'vector_l2_ops'},
+          postgresql_where=FeatureVector.post_type == PostType.IMAGE,
+      )
   ]
 
   @inject
   def __init__(self, session_provider: ProviderOf[Session]) -> None:
-    super().__init__(FeatureKey, Feature, session_provider)
+    super().__init__(FeatureVectorKey, FeatureVector, session_provider)

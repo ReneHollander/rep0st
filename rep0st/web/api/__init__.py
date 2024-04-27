@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Any
 
+from absl import flags
 from injector import Module, inject, singleton
 from werkzeug import Request, Response
 from werkzeug.routing import Rule
@@ -16,6 +17,8 @@ from rep0st.util import AutoJSONEncoder
 from rep0st.web import MediaHelper
 
 log = logging.getLogger(__name__)
+
+FLAGS = flags.FLAGS
 
 
 class ApiModule(Module):
@@ -59,9 +62,9 @@ class Api(MediaHelper):
         },
         status=200)
 
-  def _search(self, data: bytes) -> Response:
+  def _search(self, data: bytes, exact: bool | None = False) -> Response:
     try:
-      results = self.post_search_service.search_file(data)
+      results = self.post_search_service.search_file(data, exact=exact)
     except (NoMediaFoundException, ImageDecodeException):
       return self.render(error='invalid image', status=400)
     except:
@@ -77,21 +80,29 @@ class Api(MediaHelper):
   @transactional()
   @endpoint(Rule('/api/search', methods=['POST']))
   def search_upload(self, request: Request):
+    exact = request.args.get('exact', False, bool)
+
+    if exact and not FLAGS.rep0st_web_enable_exact_search:
+      return self.render(error='exact search is deactivated', status=400)
     try:
       file = self._file_from_post_request(request)
       data = file.read()
     except:
       return self.render(error='no image', status=400)
 
-    return self._search(data)
+    return self._search(data, exact=exact)
 
   @transactional()
   @endpoint(Rule('/api/search', methods=['GET']))
   def search_url(self, request: Request):
     url = request.args.get('url')
+    exact = request.args.get('exact', False, bool)
+
+    if exact and not FLAGS.rep0st_web_enable_exact_search:
+      return self.render(error='exact search is deactivated', status=400)
     if not url:
       return self.render(error='url parameter missing', status=400)
     data = self.file_from_url(url)
     if not data:
       return self.render(error='could not load image from url', status=400)
-    return self._search(data)
+    return self._search(data, exact=exact)

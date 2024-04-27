@@ -1,10 +1,16 @@
 import logging
 from typing import BinaryIO, Optional
 
+from absl import flags
 import requests
 from werkzeug import Request
 
 log = logging.getLogger(__name__)
+
+FLAGS = flags.FLAGS
+flags.DEFINE_bool(
+    'rep0st_web_enable_exact_search', False,
+    'If True, exact search can be used via the `exact` query parameter.')
 
 
 class MediaHelper:

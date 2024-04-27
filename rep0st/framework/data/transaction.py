@@ -21,7 +21,7 @@ class _TransactionalConfiguration:
 transactional_state = local()
 
 
-def transactional() -> Any:
+def transactional(autoflush: bool | None = None) -> Any:
 
   def decorator(fun: Callable):
     transactional_configuration = _TransactionalConfiguration()
@@ -37,6 +37,9 @@ def transactional() -> Any:
         )
         # Session start. Implicit with transactional_configuration.injector.get(DatabaseSession)
         pass
+      autoflush_state = session.autoflush
+      if autoflush is not None:
+        session.autoflush = autoflush
       transactional_state.depth += 1
       try:
         ret = fun(*args, **kwargs)
@@ -67,6 +70,8 @@ def transactional() -> Any:
           )
           session_factory.remove()
           delattr(transactional_state, 'depth')
+      if autoflush is not None:
+        session.autoflush = autoflush_state
       return ret
 
     wrapper.__transactional__ = transactional_configuration

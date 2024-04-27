@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   update_posts:
     build:
@@ -8,16 +6,16 @@ services:
     restart: always
     command:
       - rep0st.job.update_posts_job
-      - --webserver_bind_hostname=127.0.0.1
+      - --webserver_bind_hostname=0.0.0.0
       - --webserver_bind_port=5000
       - --pr0gramm_api_user_file=/run/secrets/pr0gramm_user
       - --pr0gramm_api_password_file=/run/secrets/pr0gramm_password
-      - --pr0gramm_api_limit_id_to=100
-      - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
+      - --rep0st_update_posts_end_id=500
+      - --rep0st_database_uri=postgresql+psycopg2://rep0st:pw@pg01:5432/rep0st
       - --rep0st_update_all_posts_job_schedule=*/5 * * * *
       - --rep0st_media_path=/media/
     depends_on:
-      - mdb01
+      - pg01
     ports:
       - 5001:5000
     volumes:
@@ -33,15 +31,13 @@ services:
     restart: always
     command:
       - rep0st.job.update_features_job
-      - --webserver_bind_hostname=127.0.0.1
+      - --webserver_bind_hostname=0.0.0.0
       - --webserver_bind_port=5000
-      - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
-      - --rep0st_elasticsearch_uris=http://es01:9200
+      - --rep0st_database_uri=postgresql+psycopg2://rep0st:pw@pg01:5432/rep0st
       - --rep0st_media_path=/media/
       - --rep0st_update_features_post_type=IMAGE
     depends_on:
-      - mdb01
-      - es01
+      - pg01
     ports:
       - 5002:5000
     volumes:
@@ -54,15 +50,13 @@ services:
     restart: always
     command:
       - rep0st.job.update_features_job
-      - --webserver_bind_hostname=127.0.0.1
+      - --webserver_bind_hostname=0.0.0.0
       - --webserver_bind_port=5000
-      - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
-      - --rep0st_elasticsearch_uris=http://es01:9200
+      - --rep0st_database_uri=postgresql+psycopg2://rep0st:pw@pg01:5432/rep0st
       - --rep0st_media_path=/media/
       - --rep0st_update_features_post_type=VIDEO
     depends_on:
-      - mdb01
-      - es01
+      - pg01
     ports:
       - 5003:5000
     volumes:
@@ -75,13 +69,11 @@ services:
     restart: always
     command:
       - rep0st.web
-      - --webserver_bind_hostname=127.0.0.1
+      - --webserver_bind_hostname=0.0.0.0
       - --webserver_bind_port=5000
-      - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
-      - --rep0st_elasticsearch_uris=http://es01:9200
+      - --rep0st_database_uri=postgresql+psycopg2://rep0st:pw@pg01:5432/rep0st
     depends_on:
-      - mdb01
-      - es01
+      - pg01
     ports:
       - 5000:5000
 
@@ -92,9 +84,5 @@ secrets:
     file: ../secrets/pr0gramm_password.txt
 
 volumes:
-  mdb01data:
-    driver: local
-  es01data:
-    driver: local
   media:
     driver: local

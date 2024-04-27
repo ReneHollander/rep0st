@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 from typing import BinaryIO, NewType, Optional
 
+from absl import flags
 from injector import Module, provider, ProviderOf, inject, singleton
 import jinja2
 from jinja2 import FileSystemLoader, Template, select_autoescape
@@ -20,6 +21,8 @@ from rep0st.service.post_search_service import PostSearchService, PostSearchServ
 from rep0st.web import MediaHelper
 
 log = logging.getLogger(__name__)
+
+FLAGS = flags.FLAGS
 
 MainTemplate = NewType('MainTemplate', Template)
 
@@ -115,6 +118,10 @@ class Main(MediaHelper):
   def search(self, request: Request) -> Response:
     file = self._file_from_post_request(request)
     url = request.form.get('url')
+    exact = request.args.get('exact', False, bool)
+
+    if exact and not FLAGS.rep0st_web_enable_exact_search:
+      return self.render(status=400, error='Exakte Suche ist deaktiviert!')
 
     if file and url:
       return self.render(status=400, error='Entweder Datei oder URL angeben!')
@@ -134,7 +141,7 @@ class Main(MediaHelper):
             status=400, error='Bild konnte nicht von der URL geladen werden!')
 
     try:
-      results = self.post_search_service.search_file(data)
+      results = self.post_search_service.search_file(data, exact=exact)
       return self.render(search_results=results)
     except (NoMediaFoundException, ImageDecodeException):
       return self.render(status=400, error='Ungültiges Bild!')

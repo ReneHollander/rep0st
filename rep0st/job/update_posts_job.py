@@ -16,6 +16,12 @@ flags.DEFINE_string(
 flags.DEFINE_string(
     'rep0st_update_all_posts_job_schedule', '',
     'Schedule in crontab format for running the all post update job.')
+flags.DEFINE_integer('rep0st_update_posts_end_id', None,
+                     'Post ID at which to end the update posts job.')
+flags.DEFINE_integer('rep0st_update_all_posts_start_id', None,
+                     'Post ID at which to start the update all posts job.')
+flags.DEFINE_integer('rep0st_update_all_posts_end_id', None,
+                     'Post ID at which to end the update all posts job.')
 
 
 class UpdatePostsJobModule(Module):
@@ -39,10 +45,12 @@ class UpdatePostsJob:
                        self.update_all_posts_job)
 
   def update_posts_job(self):
-    self.post_service.update_posts()
+    self.post_service.update_posts(end_id=FLAGS.rep0st_update_posts_end_id)
 
   def update_all_posts_job(self):
-    self.post_service.update_all_posts()
+    self.post_service.update_all_posts(
+        start_id=FLAGS.rep0st_update_all_posts_start_id,
+        end_id=FLAGS.rep0st_update_all_posts_end_id)
 
 
 def modules() -> List[Any]:

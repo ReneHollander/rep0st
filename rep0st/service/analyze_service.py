@@ -1,13 +1,10 @@
 import logging
 import time
-from typing import Dict, List
 
 import cv2
 import numpy
-from injector import Module, inject, singleton
-
-from rep0st.analyze import Analyzer, Analyzers, InputImage
-from rep0st.analyze.feature_vector_analyzer import FeatureVectorAnalyzerModule
+from numpy.typing import NDArray
+from injector import Module, singleton
 
 log = logging.getLogger(__name__)
 
@@ -15,35 +12,43 @@ log = logging.getLogger(__name__)
 class AnalyzeServiceModule(Module):
 
   def configure(self, binder):
-    binder.install(FeatureVectorAnalyzerModule)
-    # TODO(rhollander): Enable other analyzers.
-    # binder.install(AverageHashAnalyzerModule)
-    # binder.install(DifferenceHashAnalyzerModule)
-    # binder.install(PerceptualHashAnalyzerModule)
-    # binder.install(WaveletHashAnalyzerModule)
     binder.bind(AnalyzeService)
+
+
+def _calculate_feature_vec(image: NDArray) -> NDArray:
+  image = image.astype(numpy.float32)
+  scaled = cv2.resize(image, (6, 6), interpolation=cv2.INTER_AREA)
+  # cvtColor expects floating point image to be normalized between 0 and 1
+  scaled *= (1. / 255.)
+  hsv = cv2.cvtColor(scaled, cv2.COLOR_BGR2HSV)
+
+  # extract image channels
+  # 0<=H<=360
+  hue = hsv[:, :, 0]
+  # Divide by:
+  #   2 to get the 0<=H<=360 value into 0.255
+  #   2 again for magic reasons
+  #   255 to normalize between 0 and 1
+  hue *= (1. / 2. / 2. / 255.)
+
+  # 0<=S<=1
+  sat = hsv[:, :, 1]
+  # 0<=S<=1
+  val = hsv[:, :, 2]
+
+  # concat channels for feature vector
+  vec = numpy.concatenate((hue.flatten(), sat.flatten(), val.flatten()))
+
+  return vec
 
 
 @singleton
 class AnalyzeService:
-  _analyzers: List[Analyzer] = None
 
-  @inject
-  def __init__(self, analyzers: Analyzers) -> None:
-    self._analyzers = set(analyzers)
-    for analyzer in self._analyzers:
-      log.info(f'Registered analyzer {analyzer.get_type()}')
-
-  def analyze(self, image: numpy.ndarray):
-    input_image = InputImage(image, cv2.cvtColor(image, cv2.COLOR_BGR2GRAY))
-
-    result = {}
-    for analyzer in self._analyzers:
-      start = time.time()
-      result[analyzer.get_type()] = analyzer.analyze(input_image)
-      end = time.time()
-      time_taken = end - start
-      log.debug(
-          f'Analyzed image {image.shape} with analyzer {analyzer.get_type()} in {time_taken * 1000:.2f}ms'
-      )
-    return result
+  def analyze(self, image: NDArray) -> NDArray[numpy.float32]:
+    start = time.time()
+    vec = _calculate_feature_vec(image)
+    end = time.time()
+    time_taken = end - start
+    log.debug(f'Analyzed image in {time_taken * 1000:.2f}ms')
+    return vec

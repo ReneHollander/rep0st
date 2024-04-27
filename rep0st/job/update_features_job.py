@@ -4,10 +4,10 @@ from typing import Any, List
 from absl import flags
 from injector import Binder, Module, inject, singleton
 
+from rep0st.db import PostType
 from rep0st.framework import app
 from rep0st.framework.scheduler import Scheduler, SchedulerModule
 from rep0st.service.feature_service import FeatureService, FeatureServiceModule
-from rep0st.db.post import Type as PostType
 
 log = logging.getLogger(__name__)
 FLAGS = flags.FLAGS

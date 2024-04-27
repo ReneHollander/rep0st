@@ -1,14 +1,15 @@
+from datetime import datetime, timezone
 import logging
 import time
-from datetime import datetime, timezone
-from typing import Iterator, NamedTuple, Optional
+from typing import Iterator, NamedTuple
+import urllib
 
 from absl import flags
 from injector import Module, provider, singleton
 from prometheus_client import Counter
 from requests import RequestException, Response, Session, Timeout
 
-from rep0st.db.post import Post, PostErrorStatus, post_type_from_media_path
+from rep0st.db.post import Post, post_type_from_media_path
 from rep0st.db.tag import Tag
 from rep0st.util import get_secret
 
@@ -37,11 +38,6 @@ flags.DEFINE_string('pr0gramm_api_baseurl_vid', 'https://vid.pr0gramm.com',
                     'Baseurl for the pr0gramm image API.')
 flags.DEFINE_string('pr0gramm_api_baseurl_full', 'https://full.pr0gramm.com',
                     'Baseurl for the pr0gramm image API.')
-
-flags.DEFINE_integer('pr0gramm_api_limit_id_to', None, (
-    'If set, the API will indicate only posts below the limit id will be '
-    'returned. Used to for debugging and building a small test environment locally'
-))
 
 logins_z = Counter('rep0st_pr0gramm_api_logins',
                    'Number of logins to pr0gramm by status.', ['status'])
@@ -79,24 +75,16 @@ class Pr0grammAPI:
   baseurl_img: str = None
   baseurl_vid: str = None
   baseurl_full: str = None
-  limit_id_to: int = None
   session: Session = Session()
 
-  def __init__(self,
-               api_user: str,
-               api_password: str,
-               baseurl_api: str,
-               baseurl_img: str,
-               baseurl_vid: str,
-               baseurl_full: str,
-               limit_id_to: Optional[int] = None):
+  def __init__(self, api_user: str, api_password: str, baseurl_api: str,
+               baseurl_img: str, baseurl_vid: str, baseurl_full: str):
     self.api_user = api_user
     self.api_password = api_password
     self.baseurl_api = baseurl_api
     self.baseurl_img = baseurl_img
     self.baseurl_vid = baseurl_vid
     self.baseurl_full = baseurl_full
-    self.limit_id_to = limit_id_to
 
   def perform_login(self) -> None:
     error_count = 0
@@ -155,7 +143,7 @@ class Pr0grammAPI:
         response.raise_for_status()
         requests_z.labels(status=f'ok').inc()
         return response
-      except (RequestException | Timeout) as e:
+      except (RequestException, Timeout) as e:
         log.exception(
             f'Error sending get request to {url}. Retrying in {3 ** error_count} seconds...'
         )
@@ -166,20 +154,25 @@ class Pr0grammAPI:
         time.sleep(3**error_count)
         continue
 
-  def iterate_posts(self, start: int = 0) -> Iterator[Post]:
-    if self.limit_id_to and start >= self.limit_id_to:
+  def iterate_posts(self,
+                    start: int | None = 1,
+                    end: int | None = None) -> Iterator[Post]:
+    if not start:
+      start = 1
+    if end and start >= end:
       return
+    newer = start - 1
 
     at_start = False
-
     while not at_start:
+      query_params = dict(flags=31, promoted=0, newer=newer)
       data = self.perform_request(
-          f'{self.baseurl_api}/items/get?flags=31&promoted=0&newer={start}'
+          f'{self.baseurl_api}/items/get?{urllib.parse.urlencode(query_params)}'
       ).json()
       at_start = data['atStart']
 
       for item in data.get('items', ()):
-        if self.limit_id_to and item['id'] >= self.limit_id_to:
+        if end and item['id'] > end:
           return
         post = Post()
         post.id = item['id']
@@ -193,12 +186,23 @@ class Pr0grammAPI:
         post.audio = item['audio'] or False
         post.source = item['source'] or None
         post.flags = item['flags'] or None
-        post.user = item['user'] or None
+        post.username = item['user'] or None
         post.type = post_type_from_media_path(item['image'])
-        start = post.id
+        newer = post.id
         yield post
 
-  def iterate_tags(self, start: int = 0) -> Iterator[Tag]:
+  def get_latest_post_id(self) -> int | None:
+    query_params = dict(flags=31, promoted=0)
+    data = self.perform_request(
+        f'{self.baseurl_api}/items/get?{urllib.parse.urlencode(query_params)}'
+    ).json()
+    if 'items' not in data:
+      return None
+    if len(data['items']) == 0:
+      return None
+    return data['items'][0]['id']
+
+  def iterate_tags(self, start: int = 1) -> Iterator[Tag]:
     while True:
       data = self.perform_request(
           f'{self.baseurl_api}/tags/latest?id={start}').json()
@@ -240,5 +244,4 @@ class Pr0grammAPIModule(Module):
         get_secret(FLAGS.pr0gramm_api_password,
                    FLAGS.pr0gramm_api_password_file),
         FLAGS.pr0gramm_api_baseurl_api, FLAGS.pr0gramm_api_baseurl_img,
-        FLAGS.pr0gramm_api_baseurl_vid, FLAGS.pr0gramm_api_baseurl_full,
-        FLAGS.pr0gramm_api_limit_id_to)
+        FLAGS.pr0gramm_api_baseurl_vid, FLAGS.pr0gramm_api_baseurl_full)

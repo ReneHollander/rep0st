@@ -235,13 +235,11 @@ class PostRepository(Repository[int, Post]):
   @transactional()
   def get_latest_post_id_with_features(self) -> int:
     session = self._get_session()
-    id = session.query(func.max(Post.id)).join(Post.features).filter(
-        and_(Post.type == Type.IMAGE)).scalar()
+    id = session.query(func.max(Feature.post_id)).scalar()
     return 0 if id is None else id
 
   @transactional()
   def post_count_with_features(self) -> int:
     session = self._get_session()
-    id = session.query(func.count(Post.id)).join(Post.features).filter(
-        and_(Post.type == Type.IMAGE)).scalar()
+    id = session.query(func.count(Feature.post_id)).group_by(Feature.post_id).scalar()
     return 0 if id is None else id

@@ -159,6 +159,7 @@ class FeatureService:
             feature.type = type
             feature.data = data
             work_post.post.features.append(feature)
+            work_post.post.features_indexed = True
 
   @transactional()
   def _process_features(
@@ -205,8 +206,9 @@ class FeatureService:
 
   def backfill_features(self, post_type: PostType):
     log.info('Starting feature backfill')
-    it = self.post_repository.query().join(Post.features).filter(
-        and_(Post.type == post_type, Post.deleted == False))
+    it = self.post_repository.query().filter(
+        and_(Post.type == post_type, Post.deleted == False,
+             Post.features_indexed == True))
     it = it.yield_per(1000)
     it = util.iterator_every(
         it, every=10000, msg='Backfilled {current} features')

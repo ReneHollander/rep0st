@@ -102,6 +102,9 @@ class Post(Base):
   deleted = Column(Boolean(), nullable=False, default=False)
   # List of features associated with this post.
   features = relationship(Feature)
+  # True if features are indexed for this post.
+  features_indexed = Column(
+      Boolean(), nullable=False, index=True, default=False)
   # List of tags associated with this post.
   tags = relationship(Tag)
 
@@ -194,9 +197,9 @@ class Post(Base):
 class PostRepository(Repository[int, Post]):
 
   indices = [
-      # Index on error_status, type and deleted for fast missing feature lookups.
-      Index('post_error_status_type_deleted_index', Post.error_status,
-            Post.type, Post.deleted),
+      # Index on error_status, type and deleted and features_indexed for fast missing feature lookups.
+      Index('post_error_status_type_deleted_features_indexed_index',
+            Post.error_status, Post.type, Post.deleted, Post.features_indexed),
   ]
 
   @inject
@@ -220,12 +223,12 @@ class PostRepository(Repository[int, Post]):
   @transactional()
   def get_posts_missing_features(self, type: Optional[Type] = None):
     session = self._get_session()
-    q = session.query(Post).join(Post.features, isouter=True)
+    q = session.query(Post)
     if type:
       q = q.filter(Post.type == type)
     return q.filter(
         and_(Post.error_status == None, Post.deleted == False,
-             Feature.id == None))
+             Post.features_indexed == False))
 
   @transactional()
   def post_count(self) -> int:
@@ -235,11 +238,13 @@ class PostRepository(Repository[int, Post]):
   @transactional()
   def get_latest_post_id_with_features(self) -> int:
     session = self._get_session()
-    id = session.query(func.max(Feature.post_id)).scalar()
+    id = session.query(func.max(Post.id)).filter(
+        and_(Post.features_indexed == True)).scalar()
     return 0 if id is None else id
 
   @transactional()
   def post_count_with_features(self) -> int:
     session = self._get_session()
-    id = session.query(func.count(Feature.post_id)).group_by(Feature.post_id).scalar()
+    id = session.query(func.count(Post.id)).filter(
+        and_(Post.features_indexed == True)).scalar()
     return 0 if id is None else id

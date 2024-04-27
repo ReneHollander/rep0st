@@ -108,6 +108,9 @@ class PostService:
               f'Marking post deleted since it is no longer in the API: {post_from_db}'
           )
           post_from_db.deleted = True
+          # Remove the features from the DB for good measure.
+          post_from_db.features = []
+          post_from_db.features_indexed = False
           to_save.append(post_from_db)
         continue
       # Post is in both DB and API. Potentially update it.
@@ -121,8 +124,13 @@ class PostService:
             f'Updating flags of post since they changed: {post_from_db}. post_from_db.flags={post_from_db.flags}, post_from_api.flags={post_from_api.flags}'
         )
         post_from_db.flags = post_from_api.flags
+      old_error_status = post_from_db.error_status
       # Download media if not exists or broken.
       self._download_media(post_from_db)
+      if old_error_status != post_from_db.error_status:
+        # Remove the features. The update feature job will try to index the media again on the next run.
+        post_from_db.features = []
+        post_from_db.features_indexed = False
       to_save.append(post_from_db)
     # TODO(https://github.com/ReneHollander/rep0st/issues/42): Sync updates posts to elasticsearch index.
     self.post_repository.persist_all(to_save)

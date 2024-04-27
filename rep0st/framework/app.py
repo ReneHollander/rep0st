@@ -2,6 +2,7 @@ import datetime
 import importlib
 import logging
 import os
+import re
 import sys
 from typing import List, Any, Callable
 import warnings
@@ -137,8 +138,9 @@ def _pre_absl(modules_func: Callable[[], List[Any]]):
   for arg in sys.argv:
     log.info(f"  '{arg}")
   log.info('Environment passed to the application:')
+  ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
   for key, val in os.environ.items():
-    log.info(f"  '{key}={val}'")
+    log.info(f"  '{key}={ansi_escape.sub('', val)}'")
 
   return _post_absl(modules_func)
 

@@ -1,21 +1,20 @@
 import datetime
-import logging
-import sys
-import warnings
 import importlib
+import logging
 import os
+import sys
+from typing import List, Any, Callable
+import warnings
 
-import logstash_formatter
 from absl import app, flags
 from injector import Injector
-from typing import List, Any, Callable
-
+import logstash_formatter
 from prometheus_client import Info
 
 from rep0st.framework import Environment, EnvironmentModule, get_bindings
 from rep0st.framework.decorator import DecoratorProcessorModule, DecoratorProcessorRunner
 from rep0st.framework.execute import ExecuteModule, ExecuteProcessor
-from rep0st.framework.signal_handler import SignalHandlerModule
+from rep0st.framework.signal_handler import OnShutdownProcessor, SignalHandlerModule
 from rep0st.framework.status_page.metricz import MetriczPageModule
 from rep0st.framework.web import request_data
 
@@ -189,6 +188,11 @@ def _post_absl(modules_func: Callable[[], List[Any]]):
       # Run all execute methods and wait until all finished.
       execute_processor = injector.get(ExecuteProcessor)
       execute_processor.run_and_wait()
+      # Everything that wanted to be executed finished.
+
+      # Call the on_shutdown marked functions.
+      on_shutdown_processor = injector.get(OnShutdownProcessor)
+      on_shutdown_processor.handle_shutdown()
 
       log.info('Application finished successfully')
       return 0

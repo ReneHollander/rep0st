@@ -8,6 +8,8 @@ services:
     restart: always
     command:
       - rep0st.job.update_posts_job
+      - --webserver_bind_hostname=127.0.0.1
+      - --webserver_bind_port=5000
       - --pr0gramm_api_user_file=/run/secrets/pr0gramm_user
       - --pr0gramm_api_password_file=/run/secrets/pr0gramm_password
       - --pr0gramm_api_limit_id_to=100
@@ -31,6 +33,8 @@ services:
     restart: always
     command:
       - rep0st.job.update_features_job
+      - --webserver_bind_hostname=127.0.0.1
+      - --webserver_bind_port=5000
       - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
       - --rep0st_elasticsearch_uris=http://es01:9200
       - --rep0st_media_path=/media/
@@ -50,6 +54,8 @@ services:
     restart: always
     command:
       - rep0st.job.update_features_job
+      - --webserver_bind_hostname=127.0.0.1
+      - --webserver_bind_port=5000
       - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
       - --rep0st_elasticsearch_uris=http://es01:9200
       - --rep0st_media_path=/media/
@@ -69,6 +75,8 @@ services:
     restart: always
     command:
       - rep0st.web
+      - --webserver_bind_hostname=127.0.0.1
+      - --webserver_bind_port=5000
       - --rep0st_database_uri=mysql+cymysql://rep0st:pw@mdb01/rep0st?charset=utf8mb4
       - --rep0st_elasticsearch_uris=http://es01:9200
     depends_on:

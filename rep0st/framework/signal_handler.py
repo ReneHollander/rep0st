@@ -1,5 +1,6 @@
 import logging
 import signal
+import threading
 import time
 import types
 import os
@@ -53,6 +54,7 @@ class OnShutdownProcessor(DecoratorProcessor):
   injector: Injector
   methods: List[Callable[[], None]] = []
   signal_handler: SignalHandler
+  shutdown_in_progress: bool = False
 
   @inject
   def __init__(self, injector: Injector, signal_handler: SignalHandler) -> None:
@@ -77,14 +79,21 @@ class OnShutdownProcessor(DecoratorProcessor):
 
   def _shutdown_watchdog(self):
     time.sleep(5)
-    log.info("Timed out waiting for shutdown. Forcing it now... Goodbye!")
     self.signal_handler.remove_all_handlers()
+    log.warning(
+        f"Timed out waiting for shutdown... The following threads were still running: {threading.enumerate()}"
+    )
+    log.warning("Forcing shutdown now... Goodbye!")
     # Force terminate.
     os._exit(os.EX_SOFTWARE)
 
   def handle_shutdown(self):
+    if self.shutdown_in_progress:
+      return
+    self.shutdown_in_progress = True
     log.debug("Executing methods marked @on_shutdown()")
-    thread = Thread(name='Shutdown watchdog', target=self._shutdown_watchdog)
+    thread = Thread(
+        name='Shutdown watchdog', target=self._shutdown_watchdog, daemon=True)
     thread.start()
     for method in self.methods:
       method()

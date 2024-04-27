@@ -74,6 +74,8 @@ This runs the user facing web application serving the page, API and processing l
 ```shell
 pipenv run python -m rep0st.web \
   --environment=DEVELOPMENT \
+  --webserver_bind_hostname=127.0.0.1 \
+  --webserver_bind_port=5000 \
   --rep0st_database_uri="mysql+cymysql://rep0st:pw@localhost/rep0st?charset=utf8mb4"
 ```
 

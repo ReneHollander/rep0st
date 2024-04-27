@@ -53,7 +53,7 @@ class ExecuteProcessor(DecoratorProcessor):
     log.debug("Executing methods marked @execute()")
     threads = []
     for method in self.methods:
-      log.info("Executing method %s", method.__name__)
+      log.info(f"Executing method {method.__module__}.{method.__name__}")
       ret = method()
       if isinstance(ret, Thread):
         threads.append(ret)

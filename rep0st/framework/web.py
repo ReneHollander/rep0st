@@ -21,9 +21,9 @@ from rep0st.framework.execute import execute
 from rep0st.framework.signal_handler import on_shutdown
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string('webserver_bind_hostname', '0.0.0.0',
+flags.DEFINE_string('webserver_bind_hostname', '',
                     'Hostname to which to bind the HTTP server to.')
-flags.DEFINE_integer('webserver_bind_port', 5000,
+flags.DEFINE_integer('webserver_bind_port', None,
                      'Port to which to bind the HTTP server to.')
 
 _WebserverBindHostnameKey = NewType('_WebserverBindHostnameKey', str)
@@ -256,11 +256,9 @@ class EndpointProcessor(DecoratorProcessor):
         self.web_server.url_map.add(rule)
 
 
-class WebServerModule(Module):
+class _WebServerImplModule(Module):
 
   def configure(self, binder: Binder):
-    binder.bind(_WebserverBindHostnameKey, to=FLAGS.webserver_bind_hostname)
-    binder.bind(_WebserverBindPortKey, to=FLAGS.webserver_bind_port)
     binder.bind(EndpointProcessor)
     binder.bind(WebServer)
 
@@ -273,3 +271,12 @@ class WebServerModule(Module):
   def provide_default_webapp_list(self) -> List[WebApp]:
     # Provide default empty list of web applications to make injector happy.
     return []
+
+
+class WebServerModule(Module):
+
+  def configure(self, binder: Binder):
+    if FLAGS.webserver_bind_hostname and FLAGS.webserver_bind_port:
+      binder.bind(_WebserverBindHostnameKey, to=FLAGS.webserver_bind_hostname)
+      binder.bind(_WebserverBindPortKey, to=FLAGS.webserver_bind_port)
+      binder.install(_WebServerImplModule)

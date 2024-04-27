@@ -83,11 +83,13 @@ class Scheduler:
     except _SignalFinish:
       pass
     except:
-      log.exception(f'Error executing job {fun.__name__}')
+      log.exception(f'Error executing job {fun.__module__}.{fun.__name__}')
     finally:
       if not self.exit.is_set():
         if not schedule.should_loop():
-          log.debug(f'Task {fun} will not be scheduled again')
+          log.debug(
+              f'Task {fun.__module__}.{fun.__name__} will not be scheduled again'
+          )
         else:
           self._schedule_task(schedule, fun)
       self.running_tasks.remove(threading.current_thread())

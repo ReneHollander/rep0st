@@ -59,7 +59,7 @@ class Formatter(logging.Formatter):
     request_id = ''
     if hasattr(record, 'request_id'):
       request_id = f'[{record.request_id}] '
-    ts = datetime.datetime.utcfromtimestamp(record.created)
+    ts = datetime.datetime.fromtimestamp(record.created, tz=datetime.UTC)
     name = record.name
     if len(name) > 24:
       parts = name.split('.')

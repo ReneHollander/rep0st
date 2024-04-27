@@ -41,6 +41,11 @@ def batch_by_index(
     batch[i] = v
 
 
+def batched_ranges(start, end, batch_size):
+  for i in range(start, end, batch_size):
+    yield (i, min(i + batch_size - 1, end))
+
+
 def AutoJSONEncoder(obj):
   if hasattr(obj, '__json__'):
     return obj.__json__()

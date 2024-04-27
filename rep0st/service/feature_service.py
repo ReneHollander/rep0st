@@ -67,6 +67,7 @@ class WorkPost:
   image: str = None
   fullsize: str = None
   images: List[WorkImage] = []
+  started: bool = False
   done: bool = False
 
   def __init__(self, post: Post):
@@ -77,6 +78,7 @@ class WorkPost:
     self.image = post.image
     self.fullsize = post.fullsize
     self.images = []
+    self.started = False
     self.done = False
 
 
@@ -108,6 +110,7 @@ class FeatureService:
         self.post_index.count)
 
   def _process_work_post(self, work_post: WorkPost) -> WorkPost:
+    work_post.started = True
     try:
       for i, image in enumerate(self.read_media_service.get_images(work_post)):
         work_post.images.append(
@@ -124,7 +127,6 @@ class FeatureService:
           f'Error getting images for post {work_post.id}. No features are generated for it and post marked with IMAGE_BROKEN'
       )
     work_post.done = True
-    return work_post
 
   def add_features_to_posts(self,
                             posts: List[Post],
@@ -137,19 +139,18 @@ class FeatureService:
             delayed(self._process_work_post)(work_post)
             for work_post in work_posts)
       except TimeoutError:
-        for work_post in work_posts:
-          if work_post.done == False:
-            log.warn(
-                f'Post {work_post.post} could not be processed within 120s. Marking MEDIA_BROKEN'
-            )
-            work_post.error_status = PostErrorStatus.MEDIA_BROKEN
+        pass
     else:
-      work_posts = [
-          self._process_work_post(work_post) for work_post in work_posts
-      ]
+      for work_post in work_posts:
+        self._process_work_post(work_post)
 
     for work_post in work_posts:
       work_post.post.error_status = work_post.error_status
+      if work_post.started and not work_post.done:
+        log.warn(
+            f'Post {work_post.post} could not be processed within 120s. Marking MEDIA_BROKEN'
+        )
+        work_post.post.error_status = PostErrorStatus.MEDIA_BROKEN
       if work_post.post.error_status == None:
         for image in work_post.images:
           for type, data in image.features.items():

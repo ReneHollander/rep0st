@@ -26,13 +26,21 @@
 
     <main>
         <form class="search" action="/" enctype="multipart/form-data" method="post">
-            <div class="image">
+            <div>
                 <label for="upload-image">Bild</label>
                 <input id="upload-image" name="image" type="file">
             </div>
-            <div class="url">
+            <div>
                 <label for="upload-url">oder URL</label>
                 <input type="text" name="url" id="upload-url" placeholder="http://" autofocus>
+            </div>
+            <div>
+                <label>Filter</label>
+                <div id="flags">
+                    {% for flag in Flag %}
+                        <label class="checkbox"><input type="checkbox" name="flags" value="{{ flag.value }}" {% if flag in flags %}checked{% endif %}><span class="checkmark"></span>{{ flag.value|upper }}</label>
+                    {% endfor %}
+                </div>
             </div>
             <div>
                 <input type="submit" value="rep0st?" />

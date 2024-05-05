@@ -4,7 +4,7 @@ from typing import Collection, NamedTuple
 from injector import Binder, Module, inject, singleton
 
 from rep0st.db import PostType
-from rep0st.db.post import Post, PostRepository, PostRepositoryModule
+from rep0st.db.post import Flag, Post, PostRepository, PostRepositoryModule
 from rep0st.service.analyze_service import AnalyzeService, AnalyzeServiceModule
 from rep0st.service.media_service import DecodeMediaService, DecodeMediaServiceModule
 
@@ -41,6 +41,7 @@ class PostSearchService:
 
   def search_file(self,
                   data: bytes,
+                  flags: list[Flag] | None = None,
                   exact: bool | None = False) -> Collection[SearchResult]:
     image = list(self.decode_media_service.decode_image_from_buffer(data))[0]
     feature_vector = self.analyze_service.analyze(image)
@@ -50,8 +51,10 @@ class PostSearchService:
         for score, post in self.post_repository.search_posts(
             PostType.IMAGE,
             feature_vector,
-            # The number of candidates should be at least twice the limit to ensure good recall.
-            ef_search=100,
+            flags=flags,
+            # Find a lot of candidates to ensure the filter by flag doesn't
+            # yield empty results in case of a restrictive search.
+            ef_search=1000,
             exact=exact).limit(50)
     ]
 

@@ -46,6 +46,35 @@ class Flag(enum.Enum):
   POL = 'pol'
 
 
+def flagbits_to_flags(bits: int) -> list[Flag]:
+  flags = []
+  if bits & 1 != 0:
+    flags.append(Flag.SFW)
+  if bits & 2 != 0:
+    flags.append(Flag.NSFW)
+  if bits & 4 != 0:
+    flags.append(Flag.NSFL)
+  if bits & 8 != 0:
+    flags.append(Flag.NSFP)
+  if bits & 16 != 0:
+    flags.append(Flag.POL)
+
+
+def flags_to_flagbits(flags: list[Flag]) -> int:
+  bits = 0
+  if Flag.SFW in flags:
+    bits |= 1
+  if Flag.NSFW in flags:
+    bits |= 2
+  if Flag.NSFL in flags:
+    bits |= 4
+  if Flag.NSFP in flags:
+    bits |= 8
+  if Flag.POL in flags:
+    bits |= 16
+  return bits
+
+
 class PostErrorStatus(enum.Enum):
   # No media was found on pr0gramm servers.
   NO_MEDIA_FOUND = 'NO_MEDIA_FOUND'
@@ -112,6 +141,7 @@ class Post(Base):
         'is_sfw': self.is_sfw(),
         'is_nsfw': self.is_nsfw(),
         'is_nsfl': self.is_nsfl(),
+        'is_nsfp': self.is_nsfp(),
         'is_pol': self.is_pol(),
         'image': self.image,
         'thumb': self.thumb,
@@ -119,44 +149,22 @@ class Post(Base):
     }
 
   def is_sfw(self):
-    return self.flags & 1 != 0
+    return Flag.SFW in self.get_flags()
 
   def is_nsfw(self):
-    return self.flags & 2 != 0
+    return Flag.NSFW in self.get_flags()
 
   def is_nsfl(self):
-    return self.flags & 4 != 0
+    return Flag.NSFL in self.get_flags()
 
   def is_nsfp(self):
-    return self.flags & 8 != 0
+    return Flag.NSFP in self.get_flags()
 
   def is_pol(self):
-    return self.flags & 16 != 0
+    return Flag.POL in self.get_flags()
 
   def get_flags(self) -> List[Flag]:
-    flags = []
-    if self.is_sfw():
-      flags.append(Flag.SFW)
-    if self.is_nsfw():
-      flags.append(Flag.NSFW)
-    if self.is_nsfl():
-      flags.append(Flag.NSFL)
-    if self.is_nsfp():
-      flags.append(Flag.NSFP)
-    if self.is_pol():
-      flags.append(Flag.POL)
-    return flags
-
-  def get_flag_by_importance(self) -> Flag:
-    if self.is_nsfl():
-      return Flag.NSFL
-    if self.is_nsfw():
-      return Flag.NSFW
-    if self.is_nsfp():
-      return Flag.NSFP
-    if self.is_pol():
-      return Flag.POL
-    return Flag.SFW
+    return flagbits_to_flags(self.flags)
 
   def __str__(self):
     return "Post(id=" + str(self.id) + ")"
@@ -224,6 +232,7 @@ class PostRepository(Repository[int, Post]):
   def search_posts(self,
                    type: PostType,
                    feature_vector: NDArray[numpy.float32],
+                   flags: list[Flag] | None = None,
                    exact: bool | None = False,
                    ef_search: int | None = None) -> Query[Post]:
     session = self._get_session()
@@ -231,7 +240,7 @@ class PostRepository(Repository[int, Post]):
       session.connection().execute(text('SET enable_indexscan = off'))
     if ef_search:
       session.connection().execute(text(f'SET hnsw.ef_search = {ef_search}'))
-    return session.query(
+    q = session.query(
         # The largest distance between two feature_vectors can be sqrt(108),
         # since each dimension has a value between 0..1.
         # So to calculate similarity divide by the max value and then subtract
@@ -241,3 +250,6 @@ class PostRepository(Repository[int, Post]):
         Post).join(Post.feature_vectors).filter(
             FeatureVector.post_type == type).order_by(
                 FeatureVector.vec.l2_distance(feature_vector))
+    if flags:
+      q = q.filter(Post.flags.op('&')(flags_to_flagbits(flags)) > 0)
+    return q

@@ -10,7 +10,7 @@ import requests
 from werkzeug import Request, Response
 from werkzeug.routing import Rule
 
-from rep0st.db.post import PostRepository, PostRepositoryModule
+from rep0st.db.post import Flag, PostRepository, PostRepositoryModule
 from rep0st.framework import Environment
 from rep0st.framework.app import COMMIT_SHA
 from rep0st.framework.data.transaction import transactional
@@ -63,7 +63,10 @@ class TemplateModule(Module):
   @provider
   def provide_main_template(self,
                             environment: jinja2.Environment) -> MainTemplate:
-    return environment.get_template('main.html.j2')
+    return environment.get_template('main.html.j2', globals={'Flag': Flag})
+
+
+DEFAULT_FLAGS = [Flag.SFW, Flag.NSFW, Flag.NSFL, Flag.NSFP, Flag.POL]
 
 
 @singleton
@@ -111,23 +114,37 @@ class Main(MediaHelper):
 
   @endpoint(Rule('/', methods=['GET']))
   def index(self, _) -> Response:
-    return self.render()
+    return self.render(flags=DEFAULT_FLAGS)
 
   @transactional()
   @endpoint(Rule('/', methods=['POST']))
   def search(self, request: Request) -> Response:
+
+    flags = request.form.getlist('flags', type=str)
+    try:
+      flags = [Flag(flag) for flag in flags]
+    except ValueError as e:
+      return self.render(
+          status=400, error='Filter ist ungültig!', flags=DEFAULT_FLAGS)
+    if not flags:
+      return self.render(
+          status=400,
+          error='Zumindest ein Filter muss ausgewählt sein!',
+          flags=flags)
+
+    exact = request.args.get('exact', False, bool)
+    if exact and not FLAGS.rep0st_web_enable_exact_search:
+      return self.render(
+          status=400, error='Exakte Suche ist deaktiviert!', flags=flags)
+
     file = self._file_from_post_request(request)
     url = request.form.get('url')
-    exact = request.args.get('exact', False, bool)
-
-    if exact and not FLAGS.rep0st_web_enable_exact_search:
-      return self.render(status=400, error='Exakte Suche ist deaktiviert!')
-
     if file and url:
-      return self.render(status=400, error='Entweder Datei oder URL angeben!')
-
+      return self.render(
+          status=400, error='Entweder Datei oder URL angeben!', flags=flags)
     if not file and not url:
-      return self.render(status=400, error='Datei oder URL angeben!')
+      return self.render(
+          status=400, error='Datei oder URL angeben!', flags=flags)
 
     data = None
 
@@ -138,16 +155,19 @@ class Main(MediaHelper):
       data = self._file_from_url(url)
       if not data:
         return self.render(
-            status=400, error='Bild konnte nicht von der URL geladen werden!')
+            status=400,
+            error='Bild konnte nicht von der URL geladen werden!',
+            flags=flags)
 
     try:
-      results = self.post_search_service.search_file(data, exact=exact)
-      return self.render(search_results=results)
+      results = self.post_search_service.search_file(
+          data, flags=flags, exact=exact)
+      return self.render(search_results=results, flags=flags)
     except (NoMediaFoundException, ImageDecodeException):
-      return self.render(status=400, error='Ungültiges Bild!')
+      return self.render(status=400, error='Ungültiges Bild!', flags=flags)
     except Exception:
       log.exception('Error occured when searching for image')
       return self.render(
           status=500,
-          error=f'Unbekanner Fehler! Bitte inkludiere die folgende Identifikation wenn ein Bug Report erstellt wird: {request_data.id}'
-      )
+          error=f'Unbekanner Fehler! Bitte inkludiere die folgende Identifikation wenn ein Bug Report erstellt wird: {request_data.id}',
+          flags=flags)

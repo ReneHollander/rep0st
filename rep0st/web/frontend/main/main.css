@@ -32,6 +32,43 @@ textarea {
     height: 20px;
 }
 
+.checkbox {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    height: 30px;
+}
+
+.checkbox:has(input[type=checkbox]:checked) {
+    color: #ee4d2e;
+}
+
+.checkbox input[type=checkbox] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+.checkbox .checkmark {
+    display: block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid #fff;
+}
+
+.checkbox input[type=checkbox]:checked ~ .checkmark {
+    border: 1px solid #ee4d2e;
+    background-color: #ee4d2e;
+}
+
 input[type=file] {
     cursor: pointer;
     height: 30px;
@@ -142,6 +179,15 @@ main {
 .search>div>input {
     max-width: 400px;
     width: 100%;
+}
+
+.search>div>div {
+    display: flex;
+    width: 100%;
+    max-width: 400px;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1em;
 }
 
 .search>div>input[type=file] {
